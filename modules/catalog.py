@@ -28,7 +28,7 @@ class Catalog(object):
             for key in settings.columns.keys():
                 # search index in first table row (should be the col titles!)
                 cols[key] = (
-                    self.db[0].index(settings.columns[key]['caption'])
+                    self.db[0].index(settings.columns[key])
                 )
 
                 # let it be 0 if it's -1

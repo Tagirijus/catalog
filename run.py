@@ -49,6 +49,15 @@ ARGS.add_argument(
     help='JSON file holding the columns for the database'
 )
 
+# query parameter
+
+ARGS.add_argument(
+    '-i',
+    '--instruments-count',
+    action='store_true',
+    help='Count the instruments and output list'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':

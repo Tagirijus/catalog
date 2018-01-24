@@ -8,196 +8,54 @@ import json
 from modules import filecheck
 import os
 
-
 DEFAULT_COLUMNS = {
-    'title': {
-        'caption': 'Title (name)',
-        'contains csv': False
-    },
-    'title id': {
-        'caption': 'Title (ID)',
-        'contains csv': False
-    },
-    'client id': {
-        'caption': 'Client (ID)',
-        'contains csv': False
-    },
-    'client company': {
-        'caption': 'Client (company)',
-        'contains csv': False
-    },
-    'client name': {
-        'caption': 'Client (name)',
-        'contains csv': False
-    },
-    'project': {
-        'caption': 'Project',
-        'contains csv': False
-    },
-    'created': {
-        'caption': 'Created',
-        'contains csv': False
-    },
-    'project file': {
-        'caption': 'Project file',
-        'contains csv': False
-    },
-    'audio file': {
-        'caption': 'Audio file',
-        'contains csv': False
-    },
-    'published': {
-        'caption': 'Published',
-        'contains csv': False
-    },
-    'playing time': {
-        'caption': 'Playing time',
-        'contains csv': False
-    },
-    'sound alike': {
-        'caption': 'Sound alike',
-        'contains csv': True
-    },
-    'medium': {
-        'caption': 'Medium',
-        'contains csv': False
-    },
-    'genre': {
-        'caption': 'Genre',
-        'contains csv': False
-    },
-    'subgenre': {
-        'caption': 'Subgenre',
-        'contains csv': False
-    },
-    'bpm': {
-        'caption': 'BPM',
-        'contains csv': False
-    },
-    'key': {
-        'caption': 'Key',
-        'contains csv': False
-    },
-    'time signature': {
-        'caption': 'Time signature',
-        'contains csv': False
-    },
-    'versions': {
-        'caption': 'Versions',
-        'contains csv': True
-    },
-    'voices count composition': {
-        'caption': 'Voices count (composition)',
-        'contains csv': False
-    },
-    'voices composition': {
-        'caption': 'Voices (composition)',
-        'contains csv': True
-    },
-    'ensemble': {
-        'caption': 'Ensemble',
-        'contains csv': False
-    },
-    'voices count recording': {
-        'caption': 'Voices count (recording)',
-        'contains csv': False
-    },
-    'voices recording': {
-        'caption': 'Voices (recording)',
-        'contains csv': True
-    },
-    'musicians count': {
-        'caption': 'Musicians count',
-        'contains csv': False
-    },
-    'musicians names': {
-        'caption': 'Musicians (names)',
-        'contains csv': True
-    },
-    'notes': {
-        'caption': 'Notes',
-        'contains csv': False
-    },
-    'composition': {
-        'caption': 'Composition',
-        'contains csv': False
-    },
-    'arrangement': {
-        'caption': 'Arrangement',
-        'contains csv': False
-    },
-    'idea': {
-        'caption': 'Idea',
-        'contains csv': True
-    },
-    'script text': {
-        'caption': 'Script / text',
-        'contains csv': True
-    },
-    'voice actors count': {
-        'caption': 'Voice actors count',
-        'contains csv': False
-    },
-    'voice actors names': {
-        'caption': 'Voice actors (names)',
-        'contains csv': True
-    },
-    'licensing agency history': {
-        'caption': 'Licensing agency (history)',
-        'contains csv': True
-    },
-    'licensing agency actual': {
-        'caption': 'Licensing agency (actual)',
-        'contains csv': True
-    },
-    'license type': {
-        'caption': 'License type',
-        'contains csv': False
-    },
-    'non exclusive right': {
-        'caption': 'Non-exclusive right',
-        'contains csv': False
-    },
-    'exclusive right': {
-        'caption': 'Exclusive right',
-        'contains csv': False
-    },
-    'working time': {
-        'caption': 'Working time',
-        'contains csv': False
-    },
-    'income project': {
-        'caption': 'Income (project)',
-        'contains csv': False
-    },
-    'income license': {
-        'caption': 'Income (license)',
-        'contains csv': False
-    },
-    'income total': {
-        'caption': 'Income (total)',
-        'contains csv': False
-    },
-    'rating': {
-        'caption': 'Rating',
-        'contains csv': False
-    },
-    'tags': {
-        'caption': 'Tags',
-        'contains csv': True
-    },
-    'tags foreign': {
-        'caption': 'Tags (foreign)',
-        'contains csv': True
-    },
-    'description': {
-        'caption': 'Description',
-        'contains csv': False
-    },
-    'description foreign': {
-        'caption': 'Description (foreign)',
-        'contains csv': False
-    }
+    'title': 'Title (name)',
+    'title id': 'Title (ID)',
+    'client id': 'Client (ID)',
+    'client company': 'Client (company)',
+    'client name': 'Client (name)',
+    'project': 'Project',
+    'created': 'Created',
+    'project file': 'Project file',
+    'audio file': 'Audio file',
+    'published': 'Published',
+    'playing time': 'Playing time',
+    'sound alike': 'Sound alike',
+    'medium': 'Medium',
+    'genre': 'Genre',
+    'subgenre': 'Subgenre',
+    'bpm': 'BPM',
+    'key': 'Key',
+    'time signature': 'Time signature',
+    'versions': 'Versions',
+    'voices count composition': 'Voices count (composition)',
+    'voices composition': 'Voices (composition)',
+    'ensemble': 'Ensemble',
+    'voices count recording': 'Voices count (recording)',
+    'voices recording': 'Voices (recording)',
+    'musicians count': 'Musicians count',
+    'musicians names': 'Musicians (names)',
+    'notes': 'Notes',
+    'composition': 'Composition',
+    'arrangement': 'Arrangement',
+    'idea': 'Idea',
+    'script text': 'Script / text',
+    'voice actors count': 'Voice actors count',
+    'voice actors names': 'Voice actors (names)',
+    'licensing agency history': 'Licensing agency (history)',
+    'licensing agency actual': 'Licensing agency (actual)',
+    'license type': 'License type',
+    'non exclusive right': 'Non-exclusive right',
+    'exclusive right': 'Exclusive right',
+    'working time': 'Working time',
+    'income project': 'Income (project)',
+    'income license': 'Income (license)',
+    'income total': 'Income (total)',
+    'rating': 'Rating',
+    'tags': 'Tags',
+    'tags foreign': 'Tags (foreign)',
+    'description': 'Description',
+    'description foreign': 'Description (foreign)'
 }
 
 
