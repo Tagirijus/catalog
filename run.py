@@ -79,3 +79,36 @@ if __name__ == '__main__':
         file=ARGS.file,
         settings=SETTINGS
     )
+
+    # instruments count query
+    if ARGS.instruments_count:
+        # init ouput dict
+        instruments = {}
+
+        # cycle through rows (from first entry, not from title row)
+        for row in DB.db[1:]:
+            index = DB.cols['voices composition']
+
+            if index >= len(row):
+                continue
+
+            row_instruments_raw = row[index]
+            row_instruments = row_instruments_raw.split(', ')
+
+            # cycle through the instruments
+            for inst in row_instruments:
+                if inst not in instruments.keys():
+                    instruments[inst] = 1
+                else:
+                    instruments[inst] += 1
+
+        # prepare and sort output
+        out = []
+        for i in instruments:
+            out.append((instruments[i], i))
+
+        out.sort(key=lambda x: x[0])
+
+        # print output
+        for x in out:
+            print('{}: {}'.format(x[0], x[1]))
