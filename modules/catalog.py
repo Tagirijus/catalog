@@ -40,8 +40,17 @@ class Catalog(object):
 
         return cols
 
-    def count_and_show_instruments(self):
-        """Count and show instruments."""
+    def count(self, search=None):
+        """
+        Count and show data.
+
+        Outputs a tuple like this:
+            [0] -> sorted list with [0: count], [1: search string]
+            [1] -> dict with [search string] = count
+        """
+        if search not in self.cols.keys():
+            return [[0], ['None']], {'None': 0}
+
         # init ouput dict
         instruments = {}
 
@@ -69,8 +78,7 @@ class Catalog(object):
         for i in instruments:
             out.append((instruments[i], i))
 
-        out.sort(key=lambda x: x[0])
+        out.sort(key=lambda x: x[0], reverse=True)
 
-        # print output
-        for x in out:
-            print('{}: {}'.format(x[0], x[1]))
+        # return output
+        return out, instruments

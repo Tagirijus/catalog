@@ -41,7 +41,7 @@ def check(file=None, settings=None):
 
     # file given, no DB_FILE, convert it, then output it
     elif file_given and not db_exists:
-        convert(file)
+        convert(file, DB_FILE)
         return load_db(DB_FILE)
 
     # file given, DB_FILE exists, check which is newer, convert, then output
@@ -52,7 +52,7 @@ def check(file=None, settings=None):
 
         # convert if file is newer
         if file_mod_date > db_mod_date:
-            convert(file)
+            convert(file, DB_FILE)
 
         # output db
         return load_db(DB_FILE)
@@ -74,7 +74,7 @@ def load_db(file=None):
     return db
 
 
-def convert(file=None):
+def convert(file=None, db_file=None):
     """Convert given ODS to DB_FILE."""
     try:
         # get the data from the ODS
@@ -83,7 +83,7 @@ def convert(file=None):
         # get the first table only and save it to PKL
         for i, x in enumerate(data.keys()):
             if i == 0:
-                with open('DB.pkl', 'wb') as output:
+                with open(db_file, 'wb') as output:
                     pickle.dump(data[x], output)
                 break
     except Exception as e:

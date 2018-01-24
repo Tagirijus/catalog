@@ -82,4 +82,6 @@ if __name__ == '__main__':
 
     # instruments count query
     if ARGS.instruments_count:
-        DB.count_and_show_instruments()
+        show, null = DB.count(search='voices composition')
+        for x in show:
+            print('{}: {}'.format(x[0], x[1]))
