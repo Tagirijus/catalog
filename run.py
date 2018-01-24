@@ -63,7 +63,7 @@ ARGS.add_argument(
     '--csv',
     default=False,
     action='store_true',
-    help='Handle cell content as CSV while counting'
+    help='Handle cell content as CSV'
 )
 
 ARGS = ARGS.parse_args()
