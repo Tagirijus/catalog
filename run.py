@@ -52,10 +52,18 @@ ARGS.add_argument(
 # query parameter
 
 ARGS.add_argument(
-    '-i',
-    '--instruments-count',
+    '-n',
+    '--count',
+    default=False,
+    metavar='COLUMN',
+    help='Count the parameter and output list'
+)
+
+ARGS.add_argument(
+    '--csv',
+    default=False,
     action='store_true',
-    help='Count the instruments and output list'
+    help='Handle cell content as CSV while counting'
 )
 
 ARGS = ARGS.parse_args()
@@ -81,7 +89,14 @@ if __name__ == '__main__':
     )
 
     # instruments count query
-    if ARGS.instruments_count:
-        show, null = DB.count(search='voices composition')
-        for x in show:
-            print('{}: {}'.format(x[0], x[1]))
+    if ARGS.count:
+        show, null = DB.count(
+            settings=SETTINGS,
+            search=ARGS.count,
+            csv=ARGS.csv
+        )
+        if show is False:
+            print('Column not found.')
+        else:
+            for x in show:
+                print('{}: {}'.format(x[0], x[1]))

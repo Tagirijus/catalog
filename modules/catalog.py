@@ -40,7 +40,7 @@ class Catalog(object):
 
         return cols
 
-    def count(self, search=None):
+    def count(self, settings=None, search=None, csv=False):
         """
         Count and show data.
 
@@ -48,11 +48,24 @@ class Catalog(object):
             [0] -> sorted list with [0: count], [1: search string]
             [1] -> dict with [search string] = count
         """
-        if search not in self.cols.keys():
-            return [[0], ['None']], {'None': 0}
+        if settings is None:
+            return False, None
 
-        # init ouput dict
-        instruments = {}
+        # check if the internal column name was given
+        internal_col_given = search in self.cols.keys()
+
+        # check if a "translated" column name was given (like form the columns.json)
+        translated_col_given = False
+        for key, value in settings.columns.items():
+            if search == value:
+                search = key
+                translated_col_given = True
+
+        if not internal_col_given and not translated_col_given:
+            return False, None
+
+        # init output dict
+        search_data = {}
 
         # cycle through rows (from first entry, not from title row)
         for row in self.db[1:]:
@@ -61,24 +74,27 @@ class Catalog(object):
             if index >= len(row):
                 continue
 
-            row_instruments_raw = row[index]
-            row_instruments = row_instruments_raw.split(', ')
+            if csv:
+                row_search_data_raw = row[index]
+                row_search_data = row_search_data_raw.split(', ')
+            else:
+                row_search_data = [row[index]]
 
-            # cycle through the instruments
-            for inst in row_instruments:
+            # cycle through the search_data
+            for inst in row_search_data:
                 if inst == '':
                     continue
-                if inst not in instruments.keys():
-                    instruments[inst] = 1
+                if inst not in search_data.keys():
+                    search_data[inst] = 1
                 else:
-                    instruments[inst] += 1
+                    search_data[inst] += 1
 
         # prepare and sort output
         out = []
-        for i in instruments:
-            out.append((instruments[i], i))
+        for i in search_data:
+            out.append((search_data[i], i))
 
         out.sort(key=lambda x: x[0], reverse=True)
 
         # return output
-        return out, instruments
+        return out, search_data
