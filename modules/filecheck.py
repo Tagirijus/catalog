@@ -2,32 +2,38 @@
 This module checks certain file specific things.
 
 It checks if the given file exists. It also checks if the ODS is newer
-than the converted CSV file and converts it then. The mechanic is for
+than the converted PKL file and converts it then. The mechanic is for
 lowering the loading time of the programm, if the original ODS did not
 change. For a big ODS the programm would start slowly otherwise.
 """
 
-import csv
 import os
+import pickle
 from pyexcel_ods import get_data
 
-path_to_module = os.path.dirname(os.path.realpath(__file__))
-DB_FILE = path_to_module + '/db.csv'
 
-
-def check(file=None):
+def check(file=None, settings=None):
     """Check file and return list."""
+    # try to create DB_FILE absolute path
+    try:
+        DB_FILE = settings.BASE_PATH + '/DB.pkl'
+    except Exception:
+        DB_FILE = os.path.dirname(os.path.realpath(__file__)) + '/DB.pkl'
 
     # no file parameter given
     file_given = file is not None
 
     # file given, but not valid - exit programm immediately
-    if file_given and not os.path.isfile(file):
+    if file_given and not exists(file):
         print('No valid file given.')
         exit()
 
     # DB_FILE already exists?
-    db_exists = os.path.isfile(DB_FILE)
+    try:
+        db_exists = exists(DB_FILE) and not settings.force_convert
+    except Exception:
+        print('Error with settings object.')
+        exit()
 
     # no file given at all, use DB_FILE instead
     if not file_given and db_exists:
@@ -59,16 +65,13 @@ def check(file=None):
 
 def load_db(file=None):
     """Load the CSV and return a list."""
+    db = []
     if file is not None:
-        db = []
-        with open(file, 'r') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-            for row in spamreader:
-                db.append(row)
-        return db
+        with open(file, 'rb') as load:
+            db = pickle.load(load)
     else:
-        print('Error while loading the CSV.')
-        return []
+        print('Error while loading the PKL.')
+    return db
 
 
 def convert(file=None):
@@ -77,16 +80,16 @@ def convert(file=None):
         # get the data from the ODS
         data = get_data(file)
 
-        # get the first table only
+        # get the first table only and save it to PKL
         for i, x in enumerate(data.keys()):
             if i == 0:
-                table = data[x]
+                with open('DB.pkl', 'wb') as output:
+                    pickle.dump(data[x], output)
                 break
-
-        # save this table in the DB_FILE
-        with open(DB_FILE, 'w') as csvfile:
-            spamwriter = csv.writer(csvfile, delimiter=',', quotechar='"')
-            for row in table:
-                spamwriter.writerow(row)
     except Exception as e:
         raise e
+
+
+def exists(file=None):
+    """Check if file exists."""
+    return os.path.isfile(file)
