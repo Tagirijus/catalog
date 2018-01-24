@@ -40,7 +40,15 @@ class Catalog(object):
 
         return cols
 
-    def count(self, settings=None, search=None, csv=False, date='day'):
+    def count(
+        self,
+        settings=None,
+        search=None,
+        csv=False,
+        date='day',
+        sort='count',
+        reverse=False
+    ):
         """
         Count and show data.
 
@@ -112,12 +120,16 @@ class Catalog(object):
                 else:
                     search_data[dat] += 1
 
-        # prepare and sort output
+        # prepare output
         out = []
         for i in search_data:
             out.append((search_data[i], i))
 
-        out.sort(key=lambda x: x[0], reverse=True)
+        # sort output by count
+        if sort == 'count':
+            out.sort(key=lambda x: x[0], reverse=reverse)
+        elif sort == 'value':
+            out.sort(key=lambda x: x[1], reverse=reverse)
 
         # return output
         return out, search_data

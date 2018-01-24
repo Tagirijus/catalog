@@ -80,6 +80,22 @@ ARGS.add_argument(
     help='Narrow counting to year, month or day'
 )
 
+ARGS.add_argument(
+    '-s',
+    '--sort',
+    default='count',
+    choices=['value', 'count'],
+    help='Sort output by value or count'
+)
+
+ARGS.add_argument(
+    '-r',
+    '--reverse',
+    default=False,
+    action='store_true',
+    help='Sort in reverse'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -108,7 +124,9 @@ if __name__ == '__main__':
             settings=SETTINGS,
             search=ARGS.count,
             csv=ARGS.csv,
-            date=ARGS.date
+            date=ARGS.date,
+            sort=ARGS.sort,
+            reverse=ARGS.reverse
         )
         if show is False:
             print('Column not found.')
