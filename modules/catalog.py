@@ -56,7 +56,7 @@ class Catalog(object):
 
         # cycle through rows (from first entry, not from title row)
         for row in self.db[1:]:
-            index = self.cols['voices composition']
+            index = self.cols[search]
 
             if index >= len(row):
                 continue
