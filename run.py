@@ -66,6 +66,13 @@ ARGS.add_argument(
     help='Handle cell content as CSV'
 )
 
+ARGS.add_argument(
+    '-l',
+    '--list',
+    action='store_true',
+    help='List possible columns'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -100,3 +107,12 @@ if __name__ == '__main__':
         else:
             for x in show:
                 print('{}: {}'.format(x[0], x[1]))
+
+    # list columns
+    if ARGS.list:
+        print('Possible columns:')
+        for x in SETTINGS.columns:
+            print('{}: {}'.format(
+                x,
+                SETTINGS.columns[x]
+            ))
