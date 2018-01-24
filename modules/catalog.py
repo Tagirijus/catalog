@@ -57,6 +57,8 @@ class Catalog(object):
 
             # cycle through the instruments
             for inst in row_instruments:
+                if inst == '':
+                    continue
                 if inst not in instruments.keys():
                     instruments[inst] = 1
                 else:
