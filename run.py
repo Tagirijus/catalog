@@ -34,8 +34,7 @@ ARGS.add_argument(
 )
 
 ARGS.add_argument(
-    '-d',
-    '--default',
+    '--create-default',
     default=None,
     metavar='JSON file',
     help='Create JSON file holding the default columns for the database'
@@ -73,6 +72,14 @@ ARGS.add_argument(
     help='List possible columns'
 )
 
+ARGS.add_argument(
+    '-d',
+    '--date',
+    default='day',
+    choices=['year', 'month', 'day'],
+    help='Narrow counting to year, month or day'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -83,9 +90,9 @@ if __name__ == '__main__':
     )
 
     # get default columns, if parameter is set
-    if ARGS.default is not None:
+    if ARGS.create_default is not None:
         SETTINGS.dump_default_columns_to_file(
-            file=ARGS.default
+            file=ARGS.create_default
         )
         exit()
 
@@ -100,7 +107,8 @@ if __name__ == '__main__':
         show, null = DB.count(
             settings=SETTINGS,
             search=ARGS.count,
-            csv=ARGS.csv
+            csv=ARGS.csv,
+            date=ARGS.date
         )
         if show is False:
             print('Column not found.')

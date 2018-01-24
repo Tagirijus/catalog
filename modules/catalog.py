@@ -40,7 +40,7 @@ class Catalog(object):
 
         return cols
 
-    def count(self, settings=None, search=None, csv=False):
+    def count(self, settings=None, search=None, csv=False, date='day'):
         """
         Count and show data.
 
@@ -81,13 +81,36 @@ class Catalog(object):
                 row_search_data = [row[index]]
 
             # cycle through the search_data
-            for inst in row_search_data:
-                if inst == '':
+            for dat in row_search_data:
+                # continue counting, if the cell is empty
+                if dat == '':
                     continue
-                if inst not in search_data.keys():
-                    search_data[inst] = 1
+
+                # alter the dat, if it's a date
+                is_date = type(dat).__name__ == 'date'
+                is_month = date == 'month'
+                is_year = date == 'year'
+                if is_date and is_month:
+                    dat = '{}-{:02d}'.format(
+                        dat.year,
+                        dat.month
+                    )
+                elif is_date and is_year:
+                    dat = '{}'.format(
+                        dat.year
+                    )
+                elif is_date:
+                    dat = '{}-{:02d}-{:02d}'.format(
+                        dat.year,
+                        dat.month,
+                        dat.day
+                    )
+
+                # append the dat to the search_data
+                if dat not in search_data.keys():
+                    search_data[dat] = 1
                 else:
-                    search_data[inst] += 1
+                    search_data[dat] += 1
 
         # prepare and sort output
         out = []
