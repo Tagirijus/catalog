@@ -96,8 +96,6 @@ def convert(file=None, db_file=None):
                 # write it to PKL
                 with open(db_file, 'wb') as output:
                     pickle.dump(table, output)
-                for debug in table:
-                    print(debug)
                 print('Converted {} to {}'.format(
                     file,
                     db_file
