@@ -106,6 +106,14 @@ ARGS.add_argument(
     )
 )
 
+ARGS.add_argument(
+    '-t',
+    '--total',
+    default=None,
+    metavar='COLUMN',
+    help='Try to use the COLUMN value for summing'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -137,7 +145,8 @@ if __name__ == '__main__':
             date=ARGS.date,
             sort=ARGS.sort,
             reverse=ARGS.reverse,
-            filter=ARGS.filter
+            filter=ARGS.filter,
+            total=ARGS.total
         )
         if show is False:
             print('Column not found: {}.'.format(ARGS.count))

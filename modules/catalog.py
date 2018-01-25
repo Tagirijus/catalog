@@ -49,7 +49,8 @@ class Catalog(object):
         date='day',
         sort='count',
         reverse=False,
-        filter=None
+        filter=None,
+        total=None
     ):
         """
         Count and show data.
@@ -92,7 +93,7 @@ class Catalog(object):
                     continue
 
                 # alter the dat, if it's a date
-                is_date = type(dat).__name__ == 'date'
+                is_date = type(dat) is datetime.date
                 is_month = date == 'month'
                 is_year = date == 'year'
                 if is_date and is_month:
@@ -111,11 +112,33 @@ class Catalog(object):
                         dat.day
                     )
 
+                # check if total COLUMN exists
+                total_column = self.search_col(
+                    settings=settings,
+                    search=total
+                )
+
+                # simply use integer as counting as fallback
+                add_me = 1
+
+                # get value to add
+                if total_column is not False:
+                    # check if type can be summed up
+                    row_type = type(row[total_column])
+
+                    # at this moment integer and timedeltas are ready to be summed
+                    if row_type is int or row_type is datetime.timedelta:
+                        add_me = row[total_column]
+
                 # append the dat to the search_data
                 if dat not in search_data.keys():
-                    search_data[dat] = 1
+                    # and begin wih simple counting
+                    search_data[dat] = add_me
+
+                # append it, but check if type is correct
                 else:
-                    search_data[dat] += 1
+                    if type(search_data[dat]) is type(add_me):
+                        search_data[dat] += add_me
 
         # prepare output
         out = []
