@@ -68,7 +68,7 @@ class Catalog(object):
                 row_search_data = [row[index]]
 
             # cycle through the search_data
-            for dat in row_search_data:
+            for i, dat in enumerate(row_search_data):
                 # continue counting, if the cell is empty
                 if dat == '':
                     continue
@@ -112,8 +112,12 @@ class Catalog(object):
                     # check if type can be summed up
                     row_type = type(row[total_column])
 
-                    # at this moment integer and timedeltas are ready to be summed
-                    if row_type is int or row_type is datetime.timedelta:
+                    # ready to be summed: int, timedelta, float
+                    if (
+                        row_type is int or
+                        row_type is datetime.timedelta or
+                        row_type is float
+                    ):
                         add_me = row[total_column]
 
                 # append the dat to the search_data
@@ -121,14 +125,21 @@ class Catalog(object):
                     # and begin wih simple counting
                     search_data[dat] = add_me
 
-                # append it, but check if type is correct
+                # try to append it, but check if type is correct
                 else:
-                    if type(search_data[dat]) is type(add_me):
+                    try:
                         search_data[dat] += add_me
+                    except Exception:
+                        print('Could not add:', row[index])
 
         # prepare output
         out = []
         for i in search_data:
+            # round count, if it's a float
+            if type(search_data[i]) is float:
+                search_data[i] = round(search_data[i])
+
+            # append it to the out variable
             out.append((search_data[i], i))
 
         # sort output by count
