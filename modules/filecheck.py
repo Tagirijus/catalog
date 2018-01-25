@@ -7,6 +7,7 @@ lowering the loading time of the programm, if the original ODS did not
 change. For a big ODS the programm would start slowly otherwise.
 """
 
+import datetime
 import os
 import pickle
 from pyexcel_ods import get_data
@@ -83,11 +84,37 @@ def convert(file=None, db_file=None):
         # get the first table only and save it to PKL
         for i, x in enumerate(data.keys()):
             if i == 0:
+                # get the temp table
+                table = []
+
+                # convert every datetime.time to datetime.timedelta
+                for row in data[x]:
+                    table.append(
+                        [convert_to_timedelta(time=y) for y in row]
+                    )
+
+                # write it to PKL
                 with open(db_file, 'wb') as output:
-                    pickle.dump(data[x], output)
+                    pickle.dump(table, output)
+                for debug in table:
+                    print(debug)
+                print('Converted {} to {}'.format(
+                    file,
+                    db_file
+                ))
                 break
     except Exception as e:
         raise e
+
+
+def convert_to_timedelta(time=None):
+    """Convert time to timedelta."""
+    if type(time) is datetime.time:
+        return datetime.datetime.combine(
+            datetime.date.min, time
+        ) - datetime.datetime.min
+    else:
+        return time
 
 
 def exists(file=None):

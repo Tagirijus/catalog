@@ -4,6 +4,7 @@ The catalog module holds the catalog object.
 The catalog object can query information.
 """
 
+import datetime
 from modules import filecheck
 
 
@@ -47,7 +48,8 @@ class Catalog(object):
         csv=False,
         date='day',
         sort='count',
-        reverse=False
+        reverse=False,
+        filter=None
     ):
         """
         Count and show data.
@@ -57,28 +59,23 @@ class Catalog(object):
             [1] -> dict with [search string] = count
         """
         if settings is None:
+            print('Catalog.count(): no settings object given.')
             return False, None
 
-        # check if the internal column name was given
-        internal_col_given = search in self.cols.keys()
+        # get the index for the column
+        index = self.search_col(
+            settings=settings,
+            search=search
+        )
 
-        # check if a "translated" column name was given (like form the columns.json)
-        translated_col_given = False
-        for key, value in settings.columns.items():
-            if search == value:
-                search = key
-                translated_col_given = True
-
-        if not internal_col_given and not translated_col_given:
+        if index is False:
             return False, None
 
         # init output dict
         search_data = {}
 
-        # cycle through rows (from first entry, not from title row)
-        for row in self.db[1:]:
-            index = self.cols[search]
-
+        # cycle through rows (from first entry, not from title row - filtered)
+        for row in self.filter(settings=settings, filter=filter):
             if index >= len(row):
                 continue
 
@@ -133,3 +130,170 @@ class Catalog(object):
 
         # return output
         return out, search_data
+
+    def search_col(self, settings=None, search=None):
+        """Return internal key of column, if found."""
+        # check if the internal column name was given
+        internal_col_given = search in self.cols.keys()
+
+        # already output it to prevent searching via for loop
+        if internal_col_given:
+            return self.cols[search]
+
+        # check if a "translated" column name was given (like form the columns.json)
+        translated_col_given = False
+        for key, value in settings.columns.items():
+            if search == value:
+                search = key
+                translated_col_given = True
+                break
+
+        if not internal_col_given and not translated_col_given:
+            return False
+        else:
+            return self.cols[search]
+
+    def filter(self, settings=None, filter=None):
+        """Filter the db."""
+        # no filter given
+        if type(filter) is not list:
+            return self.db[1:]
+
+        # filter given, init out list
+        out = self.db[1:]
+
+        # cycle through filters
+        for f in filter:
+            # continue, if column / f[0] does not exist
+            index = self.search_col(
+                settings=settings,
+                search=f[0]
+            )
+
+            if not index:
+                print('Could not apply filter. "{}" column not found.'.format(f[0]))
+                continue
+
+            # otherwise alter the out list
+            # to only include cols including the search term
+            tmp = []
+            filter_aplied = False
+            for row in out:
+                # prevent index out of range
+                if index >= len(row):
+                    continue
+
+                # only append rows, which have the search term in the chosen col
+                # check if there is any of these signs on pos 0: >, < or =
+                relative_filter = f[1][0] in ['>', '<', '=']
+
+                # get original type of the cell
+                cell_type = type(row[index])
+
+                # it's an integer
+                if cell_type is int:
+                    # can filter be an integer?
+                    try:
+                        rel_filter_in = int(f[1][1:])
+                    except Exception:
+                        relative_filter = False
+
+                # it's a date
+                if cell_type is datetime.date:
+                    # can filter be a date?
+                    try:
+                        # year-month-day ?
+                        rel_filter_in = datetime.datetime.strptime(
+                            f[1][1:], '%Y-%m-%d'
+                        ).date()
+                    except Exception:
+                        try:
+                            # year-month ?
+                            rel_filter_in = datetime.datetime.strptime(
+                                f[1][1:], '%Y-%m'
+                            ).date()
+                        except Exception:
+                            try:
+                                # year ?
+                                rel_filter_in = datetime.datetime.strptime(
+                                    f[1][1:], '%Y'
+                                ).date()
+                            except Exception:
+                                relative_filter = False
+
+                # it's a timedelta
+                if cell_type is datetime.timedelta:
+                    try:
+                        # HH:MM:SS or MM:SS ?
+                        f_split = [int(i) for i in f[1][1:].split(':')]
+
+                        # HH:MM:SS ?
+                        if len(f_split) == 3:
+                            rel_filter_in = datetime.timedelta(
+                                hours=f_split[0],
+                                minutes=f_split[1],
+                                seconds=f_split[2],
+                            )
+
+                        # MM:SS ?
+                        elif len(f_split) == 2:
+                            rel_filter_in = datetime.timedelta(
+                                minutes=f_split[0],
+                                seconds=f_split[1],
+                            )
+
+                        # nothing fits really
+                        else:
+                            relative_filter = False
+                    except Exception:
+                        relative_filter = False
+
+                # otherwise check according to >, < or =
+                if relative_filter:
+                    # str: means exclude the given search term
+                    if cell_type is str and f[1][0] in ['>', '<']:
+                        if str(f[1][1:]) not in str(row[index]):
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # str: otherwise it has to be it 100%
+                    elif cell_type is str and f[1][0] == '=':
+                        if str(f[1][1:]) == str(row[index]):
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # int, date, timedelta: cell must be higher int than filter
+                    elif cell_type is not str and f[1][0] == '>':
+                        if row[index] > rel_filter_in:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # int, date, timedelta: cell must be lower int than filter
+                    elif cell_type is not str and f[1][0] == '<':
+                        if row[index] < rel_filter_in:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # int, date, timedelta: cell must be equal int than filter
+                    elif cell_type is not str and f[1][0] == '=':
+                        if row[index] == rel_filter_in:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                # fallback / non-relative filter
+                else:
+                    if str(f[1]) in str(row[index]):
+                        tmp.append(row)
+                        filter_aplied = True
+
+            # the new out list is the tmp with only the found rows
+            out = tmp
+
+            # tell the user about the filter application
+            if filter_aplied:
+                print('Applied filter "{}" for column "{}".'.format(
+                    f[1],
+                    f[0]
+                ))
+
+        return out

@@ -27,7 +27,7 @@ ARGS.add_argument(
 )
 
 ARGS.add_argument(
-    '-f',
+    '-F',
     '--force-convert',
     action='store_true',
     help='Force converting to DB.pkl'
@@ -96,6 +96,16 @@ ARGS.add_argument(
     help='Sort in reverse'
 )
 
+ARGS.add_argument(
+    '-f',
+    '--filter',
+    nargs=2,
+    action='append',
+    help=(
+        'Get filter like [COLUMN] [SEARCH] - also multiple times'
+    )
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -126,10 +136,11 @@ if __name__ == '__main__':
             csv=ARGS.csv,
             date=ARGS.date,
             sort=ARGS.sort,
-            reverse=ARGS.reverse
+            reverse=ARGS.reverse,
+            filter=ARGS.filter
         )
         if show is False:
-            print('Column not found.')
+            print('Column not found: {}.'.format(ARGS.count))
         else:
             for x in show:
                 print('{}: {}'.format(x[0], x[1]))
