@@ -201,23 +201,29 @@ class Catalog(object):
                 # it's a date
                 if cell_type is datetime.date:
                     # can filter be a date?
+                    date_full = False
+                    date_year_month = False
+                    date_year = False
                     try:
                         # year-month-day ?
                         rel_filter_in = datetime.datetime.strptime(
                             f[1][1:], '%Y-%m-%d'
                         ).date()
+                        date_full = True
                     except Exception:
                         try:
                             # year-month ?
                             rel_filter_in = datetime.datetime.strptime(
                                 f[1][1:], '%Y-%m'
                             ).date()
+                            date_year_month = True
                         except Exception:
                             try:
                                 # year ?
                                 rel_filter_in = datetime.datetime.strptime(
                                     f[1][1:], '%Y'
                                 ).date()
+                                date_year = True
                             except Exception:
                                 relative_filter = False
 
@@ -250,33 +256,115 @@ class Catalog(object):
 
                 # otherwise check according to >, < or =
                 if relative_filter:
+                    # get checking variables
+                    cell_is_str = cell_type is str
+                    cell_is_int_or_time = (
+                        cell_type is int or
+                        cell_type is datetime.timedelta
+                    )
+                    cell_is_date_full = (
+                        cell_type is datetime.date and
+                        date_full
+                    )
+                    cell_is_date_year_month = (
+                        cell_type is datetime.date and
+                        date_year_month
+                    )
+                    cell_is_date_year = (
+                        cell_type is datetime.date and
+                        date_year
+                    )
+
                     # str: means exclude the given search term
-                    if cell_type is str and f[1][0] in ['>', '<']:
+                    if cell_is_str and f[1][0] in ['>', '<']:
                         if str(f[1][1:]) not in str(row[index]):
                             tmp.append(row)
                             filter_aplied = True
 
                     # str: otherwise it has to be it 100%
-                    elif cell_type is str and f[1][0] == '=':
+                    elif cell_is_str and f[1][0] == '=':
                         if str(f[1][1:]) == str(row[index]):
                             tmp.append(row)
                             filter_aplied = True
 
-                    # int, date, timedelta: cell must be higher int than filter
-                    elif cell_type is not str and f[1][0] == '>':
+                    # int, timedelta: cell must be higher int than filter
+                    elif cell_is_int_or_time and f[1][0] == '>':
                         if row[index] > rel_filter_in:
                             tmp.append(row)
                             filter_aplied = True
 
-                    # int, date, timedelta: cell must be lower int than filter
-                    elif cell_type is not str and f[1][0] == '<':
+                    # int, timedelta: cell must be lower int than filter
+                    elif cell_is_int_or_time and f[1][0] == '<':
                         if row[index] < rel_filter_in:
                             tmp.append(row)
                             filter_aplied = True
 
-                    # int, date, timedelta: cell must be equal int than filter
-                    elif cell_type is not str and f[1][0] == '=':
+                    # int, timedelta: cell must be equal int than filter
+                    elif cell_is_int_or_time and f[1][0] == '=':
                         if row[index] == rel_filter_in:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (full): cell must be higher date (full) than filter
+                    elif cell_is_date_full and f[1][0] == '>':
+                        if row[index] > rel_filter_in:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (full): cell must be lower date (full) than filter
+                    elif cell_is_date_full and f[1][0] == '<':
+                        if row[index] < rel_filter_in:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (full): cell must be equal date (full) than filter
+                    elif cell_is_date_full and f[1][0] == '=':
+                        if row[index] == rel_filter_in:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (Y-m): cell must be higher date (Y-m) than filter
+                    elif cell_is_date_year_month and f[1][0] == '>':
+                        if (
+                            row[index].strftime('%Y-%m') >
+                            rel_filter_in.strftime('%Y-%m')
+                        ):
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (Y-m): cell must be lower date (Y-m) than filter
+                    elif cell_is_date_year_month and f[1][0] == '<':
+                        if (
+                            row[index].strftime('%Y-%m') <
+                            rel_filter_in.strftime('%Y-%m')
+                        ):
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (Y-m): cell must be equal date (Y-m) than filter
+                    elif cell_is_date_year_month and f[1][0] == '=':
+                        if (
+                            row[index].strftime('%Y-%m') ==
+                            rel_filter_in.strftime('%Y-%m')
+                        ):
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (year): cell must be higher date (year) than filter
+                    elif cell_is_date_year and f[1][0] == '>':
+                        if row[index].year > rel_filter_in.year:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (year): cell must be lower date (year) than filter
+                    elif cell_is_date_year and f[1][0] == '<':
+                        if row[index].year < rel_filter_in.year:
+                            tmp.append(row)
+                            filter_aplied = True
+
+                    # date (year): cell must be equal date (year) than filter
+                    elif cell_is_date_year and f[1][0] == '=':
+                        if row[index].year == rel_filter_in.year:
                             tmp.append(row)
                             filter_aplied = True
 
