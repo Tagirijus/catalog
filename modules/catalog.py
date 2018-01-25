@@ -204,7 +204,7 @@ class Catalog(object):
                 search=f[0]
             )
 
-            if not index:
+            if index is False:
                 print('Could not apply filter. "{}" column not found.'.format(f[0]))
                 continue
 
