@@ -123,6 +123,10 @@ class Catalog(object):
 
                 # get value to add
                 if total_column is not False:
+                    # skip, if index out of range
+                    if total_column >= len(row):
+                        continue
+
                     # check if type can be summed up
                     row_type = type(row[total_column])
 
@@ -147,7 +151,10 @@ class Catalog(object):
 
         # sort output by count
         if sort == 'count':
-            out.sort(key=lambda x: x[0], reverse=reverse)
+            try:
+                out.sort(key=lambda x: x[0], reverse=reverse)
+            except Exception:
+                print('Different count types. Cannot sort.')
         elif sort == 'value':
             out.sort(key=lambda x: x[1], reverse=reverse)
 
