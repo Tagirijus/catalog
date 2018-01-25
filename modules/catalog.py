@@ -16,34 +16,22 @@ class Catalog(object):
         # get the db
         self.db = filecheck.check(file=file, settings=settings)
 
-        # get cols according to columsn from settings
-        self.cols = self.get_cols(settings=settings)
+        # get cols according to columsn from file
+        self.cols = self.get_cols()
 
-    def get_cols(self, settings=None):
-        """Get cols according to columns from settings."""
+    def get_cols(self):
+        """Get cols according to columns from file."""
         # init output cols dict
         cols = {}
 
-        try:
-            # cycle through col keys from settings
-            for key in settings.columns.keys():
-                # search index in first table row (should be the col titles!)
-                cols[key] = (
-                    self.db[0].index(settings.columns[key])
-                )
-
-                # let it be 0 if it's -1
-                if cols[key] < 0:
-                    cols[key] = 0
-                    print('Fetched wrong index for: ' + key)
-        except Exception as e:
-            print('Could not fetch columns: ' + str(e))
+        # get cols and their index
+        for i, x in enumerate(self.db[0]):
+            cols[x] = i
 
         return cols
 
     def count(
         self,
-        settings=None,
         search=None,
         csv=False,
         date='day',
@@ -59,15 +47,8 @@ class Catalog(object):
             [0] -> sorted list with [0: count], [1: search string]
             [1] -> dict with [search string] = count
         """
-        if settings is None:
-            print('Catalog.count(): no settings object given.')
-            return False, None
-
         # get the index for the column
-        index = self.search_col(
-            settings=settings,
-            search=search
-        )
+        index = self.search_col(search=search)
 
         if index is False:
             return False, None
@@ -76,7 +57,7 @@ class Catalog(object):
         search_data = {}
 
         # cycle through rows (from first entry, not from title row - filtered)
-        for row in self.filter(settings=settings, filter=filter):
+        for row in self.filter(filter=filter):
             if index >= len(row):
                 continue
 
@@ -113,10 +94,7 @@ class Catalog(object):
                     )
 
                 # check if total COLUMN exists
-                total_column = self.search_col(
-                    settings=settings,
-                    search=total
-                )
+                total_column = self.search_col(search=total)
 
                 # simply use integer as counting as fallback
                 add_me = 1
@@ -165,29 +143,14 @@ class Catalog(object):
         # return output
         return out, search_data
 
-    def search_col(self, settings=None, search=None):
-        """Return internal key of column, if found."""
-        # check if the internal column name was given
-        internal_col_given = search in self.cols.keys()
-
-        # already output it to prevent searching via for loop
-        if internal_col_given:
+    def search_col(self, search=None):
+        """Return index of column, if found."""
+        if search in self.cols:
             return self.cols[search]
-
-        # check if a "translated" column name was given (like form the columns.json)
-        translated_col_given = False
-        for key, value in settings.columns.items():
-            if search == value:
-                search = key
-                translated_col_given = True
-                break
-
-        if not internal_col_given and not translated_col_given:
-            return False
         else:
-            return self.cols[search]
+            return False
 
-    def filter(self, settings=None, filter=None):
+    def filter(self, filter=None):
         """Filter the db."""
         # no filter given
         if type(filter) is not list:
@@ -199,10 +162,7 @@ class Catalog(object):
         # cycle through filters
         for f in filter:
             # continue, if column / f[0] does not exist
-            index = self.search_col(
-                settings=settings,
-                search=f[0]
-            )
+            index = self.search_col(search=f[0])
 
             if index is False:
                 print('Could not apply filter. "{}" column not found.'.format(f[0]))
