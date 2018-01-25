@@ -61,7 +61,7 @@ class Catalog(object):
             if index >= len(row):
                 continue
 
-            if csv:
+            if csv and type(row[index]) is str:
                 row_search_data_raw = row[index]
                 row_search_data = row_search_data_raw.split(', ')
             else:
