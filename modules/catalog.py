@@ -127,6 +127,10 @@ class Catalog(object):
                     if total_column >= len(row):
                         continue
 
+                    # also continue, if cell is empty
+                    if row[total_column] == '':
+                        continue
+
                     # check if type can be summed up
                     row_type = type(row[total_column])
 
@@ -154,7 +158,7 @@ class Catalog(object):
             try:
                 out.sort(key=lambda x: x[0], reverse=reverse)
             except Exception:
-                print('Different count types. Cannot sort.')
+                print('Cannot sort. Different count types?')
         elif sort == 'value':
             out.sort(key=lambda x: x[1], reverse=reverse)
 
