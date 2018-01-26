@@ -59,8 +59,11 @@ class Catalog(object):
         # init output dict
         search_data = {}
 
-        # cycle through rows (from first entry, not from title row - filtered)
-        for row in self.filter(filter=filter):
+        # filter the list
+        rows_filtered = self.filter(input_list=self.db[1:], filter=filter)
+
+        # cycle through rows)
+        for row in rows_filtered:
             if index >= len(row):
                 continue
 
@@ -168,14 +171,14 @@ class Catalog(object):
         else:
             return False
 
-    def filter(self, filter=None):
+    def filter(self, input_list=None, filter=None):
         """Filter the db."""
         # no filter given
         if type(filter) is not list:
-            return self.db[1:]
+            return input_list
 
         # filter given, init out list
-        out = self.db[1:]
+        out = input_list
 
         # cycle through filters
         for f in filter:
