@@ -87,7 +87,17 @@ ARGS.add_argument(
     nargs=2,
     action='append',
     help=(
-        'Get filter like [COLUMN] [SEARCH] - also multiple times'
+        'Get excluding filter(s) like [COLUMN] [SEARCH]'
+    )
+)
+
+ARGS.add_argument(
+    '-o',
+    '--filter-or',
+    nargs=2,
+    action='append',
+    help=(
+        'Get including filter(s) like [COLUMN] [SEARCH]'
     )
 )
 
@@ -122,6 +132,7 @@ if __name__ == '__main__':
             sort=ARGS.sort,
             reverse=ARGS.reverse,
             filter=ARGS.filter,
+            filter_or=ARGS.filter_or,
             total=ARGS.total
         )
         if show is False:
