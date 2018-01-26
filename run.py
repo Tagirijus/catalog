@@ -40,7 +40,7 @@ ARGS.add_argument(
     '--count',
     default=False,
     metavar='COLUMN',
-    help='Count the parameter and output list'
+    help='Count the parameter and output list. Just count all, if COLUMN == ALL'
 )
 
 ARGS.add_argument(

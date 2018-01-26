@@ -50,8 +50,11 @@ class Catalog(object):
         # get the index for the column
         index = self.search_col(search=search)
 
-        if index is False:
+        if index is False and search != 'ALL':
             return False, None
+        elif search == 'ALL':
+            csv = False
+            index = 0
 
         # init output dict
         search_data = {}
@@ -69,8 +72,8 @@ class Catalog(object):
 
             # cycle through the search_data
             for i, dat in enumerate(row_search_data):
-                # continue counting, if the cell is empty
-                if dat == '':
+                # continue counting, if the cell is empty and search != 'ALL'
+                if dat == '' and search != 'ALL':
                     continue
 
                 # alter the dat, if it's a date
@@ -119,6 +122,10 @@ class Catalog(object):
                         row_type is float
                     ):
                         add_me = row[total_column]
+
+                # count all rows, if search == 'ALL'
+                if search == 'ALL':
+                    dat = 'All'
 
                 # append the dat to the search_data
                 if dat not in search_data.keys():
