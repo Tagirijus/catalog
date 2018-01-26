@@ -36,7 +36,7 @@ ARGS.add_argument(
 # query parameter
 
 ARGS.add_argument(
-    '-n',
+    '-c',
     '--count',
     default=False,
     metavar='COLUMN',
