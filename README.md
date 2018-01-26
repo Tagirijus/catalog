@@ -114,7 +114,3 @@ It counts the entries according to the date column and narrows it to only the ye
 ... since this would also take the month into account.
 
 I hope I could explain this little tool a bit ... maybe some will find it usefull, maybe somethign like this already exists and I wasted my time, I don't know. Have fun with it anyway. d-:
-
-# ToDo
-
-- -f / --filter should be possible to do `or` operations as well. E.g. something like `--filter-or Genre Soundtrack --filter-or Date "=2015"` would find entries which have "Soundtrack" in their Genre column _OR_ the year "2015" in their Date column.
