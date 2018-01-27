@@ -51,8 +51,7 @@ ARGS.add_argument(
 )
 
 ARGS.add_argument(
-    '-l',
-    '--list',
+    '--columns',
     action='store_true',
     help='List possible columns'
 )
@@ -69,8 +68,8 @@ ARGS.add_argument(
     '-s',
     '--sort',
     default='count',
-    choices=['value', 'count'],
-    help='Sort output by value or count'
+    metavar='{value,count} / COLUMN',
+    help='Sort output by "value" or "count" or any column, if used with the -l argument.'
 )
 
 ARGS.add_argument(
@@ -111,6 +110,37 @@ ARGS.add_argument(
     help='Try to use the COLUMN value for summing'
 )
 
+ARGS.add_argument(
+    '-l',
+    '--list',
+    action='store_true',
+    help='List rows of the table'
+)
+
+ARGS.add_argument(
+    '--header',
+    default=False,
+    action='store_true',
+    help='Enable header while listing rows of the table'
+)
+
+ARGS.add_argument(
+    '--seperator',
+    default=',',
+    help='The seperator for the columns while listing rows of the table'
+)
+
+ARGS.add_argument(
+    '-q',
+    '--quiet',
+    default=False,
+    action='store_true',
+    help=(
+        'Makes output quiet - except for the table. '
+        'Good for CSV format output direct to file via "run.py [arguments] > file.csv'
+    )
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -125,7 +155,7 @@ if __name__ == '__main__':
         settings=SETTINGS
     )
 
-    # instruments count query
+    # count query
     if ARGS.count:
         show, null = DB.count(
             search=ARGS.count,
@@ -135,7 +165,8 @@ if __name__ == '__main__':
             reverse=ARGS.reverse,
             filter=ARGS.filter,
             filter_or=ARGS.filter_or,
-            total=ARGS.total
+            total=ARGS.total,
+            quiet=ARGS.quiet
         )
         if show is False:
             print('Column not found: {}.'.format(ARGS.count))
@@ -143,7 +174,31 @@ if __name__ == '__main__':
             for x in show:
                 print('{}: {}'.format(x[0], x[1]))
 
-    # list columns
+    # show all rows
     if ARGS.list:
-        print('Possible columns:')
-        print(', '.join(DB.db[0]))
+        show = DB.list(
+            sort=ARGS.sort,
+            reverse=ARGS.reverse,
+            filter=ARGS.filter,
+            filter_or=ARGS.filter_or,
+            header=ARGS.header,
+            quiet=ARGS.quiet
+        )
+        for row in show:
+            this_row = []
+            for col in row:
+                try:
+                    this_row += [
+                        '"{}"'.format(col)
+                        if ARGS.seperator in col
+                        else col
+                    ]
+                except Exception:
+                    this_row += [str(col)]
+            print(ARGS.seperator.join(this_row))
+
+    # list columns
+    if ARGS.columns:
+        if not ARGS.quiet:
+            print('Possible columns:')
+        print(ARGS.seperator.join([str(col) for col in DB.db[0]]))

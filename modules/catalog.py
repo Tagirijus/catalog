@@ -39,7 +39,8 @@ class Catalog(object):
         reverse=False,
         filter=None,
         filter_or=None,
-        total=None
+        total=None,
+        quiet=False
     ):
         """
         Count and show data.
@@ -54,57 +55,19 @@ class Catalog(object):
         if index is False and search != 'ALL':
             return False, None
         elif search == 'ALL':
-            csv = False
             index = 0
+            # csv disabled prevents listing more rows than there are
+            csv = False
 
         # init output dict
         search_data = {}
 
-        # filter the list (excluding)
-        if type(filter) is list:
-            # init filtered list (get all indexes as well in list)
-            rows_filtered = []
-            indexes_found = self.filter(input_list=self.db[1:])
+        rows = self.get_filtered_rows(
+            filter=filter,
+            filter_or=filter_or,
+            quiet=quiet
+        )
 
-            # append found row indexes
-            for f in filter:
-                rows_filtered = self.filter(
-                    input_list=self.db[1:],
-                    filter=f,
-                    indexes_found=indexes_found
-                )
-
-                # refresh indexes_found to new found indexes
-                indexes_found = rows_filtered
-        else:
-            rows_filtered = []
-
-        # filter the list (including)
-        if type(filter_or) is list:
-            # init filtered_or list (no indexes at start)
-            rows_filtered_or = []
-
-            # append found row indexes
-            for fo in filter_or:
-                rows_filtered_or += self.filter(
-                    input_list=self.db[1:],
-                    filter=fo
-                )
-        else:
-            rows_filtered_or = []
-
-        # no filter given at all, use the whole list then
-        if type(filter) is not list and type(filter_or) is not list:
-            rows_indexes = self.filter(input_list=self.db[1:])
-
-        # filter given, combine their row indexes
-        else:
-            rows_indexes = rows_filtered + rows_filtered_or
-
-        # now get only the rows with the indexes in rows_indexes
-        rows = [x for x in self.db[1:] if self.db[1:].index(x) in rows_indexes]
-
-        # cycle through rows
         for row in rows:
             if index >= len(row):
                 continue
@@ -195,13 +158,14 @@ class Catalog(object):
             out.append((search_data[i], i))
 
         # sort output by count
-        if sort == 'count':
+        if sort == 'value':
+            out.sort(key=lambda x: x[0], reverse=reverse)
+        else:
             try:
-                out.sort(key=lambda x: x[0], reverse=reverse)
+                out.sort(key=lambda x: x[1], reverse=reverse)
             except Exception:
-                print('Cannot sort. Different count types?')
-        elif sort == 'value':
-            out.sort(key=lambda x: x[1], reverse=reverse)
+                if not quiet:
+                    print('Cannot sort. Different count types?')
 
         # return output
         return out, search_data
@@ -213,7 +177,7 @@ class Catalog(object):
         else:
             return False
 
-    def filter(self, input_list=None, filter=None, indexes_found=None):
+    def filter(self, input_list=None, filter=None, indexes_found=None, quiet=False):
         """Filter the db and output all applyable indexes as a list."""
         # no filter given
         if type(filter) is not list:
@@ -229,7 +193,7 @@ class Catalog(object):
         # continue, if column / filter[0] does not exist
         index = self.search_col(search=filter[0])
 
-        if index is False:
+        if index is False and not quiet:
             print('Could not apply filter. "{}" column not found.'.format(filter[0]))
             return [input_list.index(x) for x in input_list]
 
@@ -459,10 +423,88 @@ class Catalog(object):
                     filter_aplied = True
 
         # tell the user about the filter application
-        if filter_aplied:
+        if filter_aplied and not quiet:
             print('Applied filter "{}" for column "{}".'.format(
                 filter[1],
                 filter[0]
             ))
 
         return out
+
+    def get_filtered_rows(self, filter=None, filter_or=None, quiet=False):
+        """Return the filtered row list."""
+        # filter the list (excluding)
+        if type(filter) is list:
+            # init filtered list (get all indexes as well in list)
+            rows_filtered = []
+            indexes_found = self.filter(input_list=self.db[1:], quiet=quiet)
+
+            # append found row indexes
+            for f in filter:
+                rows_filtered = self.filter(
+                    input_list=self.db[1:],
+                    filter=f,
+                    indexes_found=indexes_found,
+                    quiet=quiet
+                )
+
+                # refresh indexes_found to new found indexes
+                indexes_found = rows_filtered
+        else:
+            rows_filtered = []
+
+        # filter the list (including)
+        if type(filter_or) is list:
+            # init filtered_or list (no indexes at start)
+            rows_filtered_or = []
+
+            # append found row indexes
+            for fo in filter_or:
+                rows_filtered_or += self.filter(
+                    input_list=self.db[1:],
+                    filter=fo,
+                    quiet=quiet
+                )
+        else:
+            rows_filtered_or = []
+
+        # no filter given at all, use the whole list then
+        if type(filter) is not list and type(filter_or) is not list:
+            return self.db[1:]
+
+        # filter given, combine their row indexes
+        else:
+            rows_indexes = rows_filtered + rows_filtered_or
+
+        # now get only the rows with the indexes in rows_indexes
+        return [x for x in self.db[1:] if self.db[1:].index(x) in rows_indexes]
+
+    def list(
+        self,
+        sort=False,
+        reverse=False,
+        filter=None,
+        filter_or=None,
+        header=False,
+        quiet=True
+    ):
+        """List all rows."""
+        if header:
+            rows = [self.db[0]]
+        else:
+            rows = []
+
+        rows += self.get_filtered_rows(
+            filter=filter,
+            filter_or=filter_or,
+            quiet=quiet
+        )
+
+        # do the sorting stuff
+        sorting_column = self.search_col(search=sort)
+
+        if sorting_column is not False:
+            rows.sort(key=lambda x: x[sorting_column], reverse=reverse)
+
+        # output the rows
+        return rows
