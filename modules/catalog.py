@@ -479,6 +479,55 @@ class Catalog(object):
         # now get only the rows with the indexes in rows_indexes
         return [x for x in self.db[1:] if self.db[1:].index(x) in rows_indexes]
 
+    def append_only_these_columns(self, db=None, append=None):
+        """Append chosen columns only, if they exist."""
+        if type(db) is not list or type(append) is not list:
+            return db
+
+        original = db
+        out = []
+
+        for row in original:
+            row_append = []
+            for append_me in append:
+                index = self.search_col(search=append_me)
+                if index is False:
+                    continue
+
+                if index >= len(row):
+                    row_append += ['']
+                else:
+                    row_append += [row[index]]
+
+            out += [row_append]
+
+        return out
+
+    def block_only_these_columns(self, db=None, block=None):
+        """Block chosen columns only, if they exist."""
+        if type(db) is not list or type(block) is not list:
+            return db
+
+        original = db
+        original_head = self.db[0]
+        out = []
+
+        for row in original:
+            row_append = row
+            for block_me in block:
+                if block_me not in original_head:
+                    continue
+                else:
+                    index = original_head.index(block_me)
+
+                if index < len(row):
+                    original_head.pop(index)
+                    row_append.pop(index)
+
+            out += [row_append]
+
+        return out
+
     def list(
         self,
         sort=False,
@@ -486,7 +535,9 @@ class Catalog(object):
         filter=None,
         filter_or=None,
         header=False,
-        quiet=True
+        quiet=True,
+        append=None,
+        block=None
     ):
         """List all rows."""
         if header:
@@ -504,7 +555,18 @@ class Catalog(object):
         sorting_column = self.search_col(search=sort)
 
         if sorting_column is not False:
-            rows.sort(key=lambda x: x[sorting_column], reverse=reverse)
+            if not header:
+                rows.sort(key=lambda x: str(x[sorting_column]), reverse=reverse)
+            else:
+                rows_data = rows[1:]
+                rows_data.sort(key=lambda x: str(x[sorting_column]), reverse=reverse)
+                rows = [rows[0]] + rows_data
+
+        # appending or blocking of rows
+        if append is not None:
+            rows = self.append_only_these_columns(db=rows, append=append)
+        elif block is not None:
+            rows = self.block_only_these_columns(db=rows, block=block)
 
         # output the rows
         return rows

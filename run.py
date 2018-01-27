@@ -141,6 +141,28 @@ ARGS.add_argument(
     )
 )
 
+ARGS.add_argument(
+    '-a',
+    '--append',
+    action='append',
+    metavar='COLUMN',
+    help=(
+        'Append a column in list output. Multiple usage of this argument is possible. '
+        'Append has higher priortiy than block'
+    )
+)
+
+ARGS.add_argument(
+    '-b',
+    '--block',
+    action='append',
+    metavar='COLUMN',
+    help=(
+        'Block a column in list output. Multiple usage of this argument is possible. '
+        'Block has lower priortiy than append'
+    )
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -182,7 +204,9 @@ if __name__ == '__main__':
             filter=ARGS.filter,
             filter_or=ARGS.filter_or,
             header=ARGS.header,
-            quiet=ARGS.quiet
+            quiet=ARGS.quiet,
+            append=ARGS.append,
+            block=ARGS.block
         )
         for row in show:
             this_row = []
