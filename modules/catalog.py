@@ -159,10 +159,10 @@ class Catalog(object):
 
         # sort output by count
         if sort == 'value':
-            out.sort(key=lambda x: x[0], reverse=reverse)
+            out.sort(key=lambda x: x[1], reverse=reverse)
         else:
             try:
-                out.sort(key=lambda x: x[1], reverse=reverse)
+                out.sort(key=lambda x: x[0], reverse=reverse)
             except Exception:
                 if not quiet:
                     print('Cannot sort. Different count types?')
