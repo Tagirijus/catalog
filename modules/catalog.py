@@ -11,10 +11,10 @@ from modules import filecheck
 class Catalog(object):
     """The catalog object."""
 
-    def __init__(self, file=None, settings=None):
+    def __init__(self, file=None, settings=None, quiet=False):
         """Initialize the class."""
         # get the db
-        self.db = filecheck.check(file=file, settings=settings)
+        self.db = filecheck.check(file=file, settings=settings, quiet=quiet)
 
         # get cols according to columsn from file
         self.cols = self.get_cols()

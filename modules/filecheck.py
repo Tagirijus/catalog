@@ -13,7 +13,7 @@ import pickle
 from pyexcel_ods import get_data
 
 
-def check(file=None, settings=None):
+def check(file=None, settings=None, quiet=False):
     """Check file and return list."""
     # try to create DB_FILE absolute path
     try:
@@ -42,7 +42,7 @@ def check(file=None, settings=None):
 
     # file given, no DB_FILE, convert it, then output it
     elif file_given and not db_exists:
-        convert(file, DB_FILE)
+        convert(file, DB_FILE, quiet)
         return load_db(DB_FILE)
 
     # file given, DB_FILE exists, check which is newer, convert, then output
@@ -53,8 +53,9 @@ def check(file=None, settings=None):
 
         # convert if file is newer
         if file_mod_date > db_mod_date:
-            print('ODS file is newer than temp file. Going to convert ...')
-            convert(file, DB_FILE)
+            if not quiet:
+                print('ODS file is newer than temp file. Going to convert ...')
+            convert(file, DB_FILE, quiet)
 
         # output db
         return load_db(DB_FILE)
@@ -76,7 +77,7 @@ def load_db(file=None):
     return db
 
 
-def convert(file=None, db_file=None):
+def convert(file=None, db_file=None, quiet=False):
     """Convert given ODS to DB_FILE."""
     try:
         # get the data from the ODS
@@ -97,10 +98,11 @@ def convert(file=None, db_file=None):
                 # write it to PKL
                 with open(db_file, 'wb') as output:
                     pickle.dump(table, output)
-                print('Converted {} to {}'.format(
-                    file,
-                    db_file
-                ))
+                if not quiet:
+                    print('Converted {} to {}'.format(
+                        file,
+                        db_file
+                    ))
                 break
     except Exception as e:
         raise e

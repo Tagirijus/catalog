@@ -174,7 +174,8 @@ if __name__ == '__main__':
     # initialize DB
     DB = catalog.Catalog(
         file=ARGS.file,
-        settings=SETTINGS
+        settings=SETTINGS,
+        quiet=ARGS.quiet
     )
 
     # count query
