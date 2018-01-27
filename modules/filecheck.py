@@ -53,6 +53,7 @@ def check(file=None, settings=None):
 
         # convert if file is newer
         if file_mod_date > db_mod_date:
+            print('ODS file is newer than temp file. Going to convert ...')
             convert(file, DB_FILE)
 
         # output db
