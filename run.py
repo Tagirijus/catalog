@@ -87,7 +87,8 @@ ARGS.add_argument(
     nargs=2,
     action='append',
     help=(
-        'Get excluding filter(s) like [COLUMN] [SEARCH]'
+        'Get excluding filter(s) like [COLUMN] [SEARCH]. '
+        '<: lower, >: higher, =: equal, #: unequal'
     )
 )
 
@@ -97,7 +98,8 @@ ARGS.add_argument(
     nargs=2,
     action='append',
     help=(
-        'Get including filter(s) like [COLUMN] [SEARCH]'
+        'Get including filter(s) like [COLUMN] [SEARCH] '
+        '<: lower, >: higher, =: equal, #: unequal'
     )
 )
 

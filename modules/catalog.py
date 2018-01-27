@@ -68,7 +68,7 @@ class Catalog(object):
 
             # append found row indexes
             for f in filter:
-                rows_filtered += self.filter(
+                rows_filtered = self.filter(
                     input_list=self.db[1:],
                     filter=f,
                     indexes_found=indexes_found
@@ -241,8 +241,8 @@ class Catalog(object):
                 continue
 
             # only append rows, which have the search term in the chosen col
-            # check if there is any of these signs on pos 0: >, < or =
-            relative_filter = filter[1][0] in ['>', '<', '=']
+            # check if there is any of these signs on pos 0: >, <, = or #
+            relative_filter = filter[1][0] in ['>', '<', '=', '#']
 
             # get original type of the cell
             cell_type = type(row[index])
@@ -311,7 +311,7 @@ class Catalog(object):
                 except Exception:
                     relative_filter = False
 
-            # otherwise check according to >, < or =
+            # otherwise check according to >, <, = or #
             if relative_filter:
                 # get checking variables
                 cell_is_str = cell_type is str
@@ -333,7 +333,7 @@ class Catalog(object):
                 )
 
                 # str: means exclude the given search term
-                if cell_is_str and filter[1][0] in ['>', '<']:
+                if cell_is_str and filter[1][0] in ['>', '<', '#']:
                     if str(filter[1][1:]) not in str(row[index]):
                         out += [row_index] if row_index in indexes_found else []
                         filter_aplied = True
@@ -362,6 +362,12 @@ class Catalog(object):
                         out += [row_index] if row_index in indexes_found else []
                         filter_aplied = True
 
+                # int, timedelta: cell must not be equal int than filter
+                elif cell_is_int_or_time and filter[1][0] == '#':
+                    if row[index] != rel_filter_in:
+                        out += [row_index] if row_index in indexes_found else []
+                        filter_aplied = True
+
                 # date (full): cell must be higher date (full) than filter
                 elif cell_is_date_full and filter[1][0] == '>':
                     if row[index] > rel_filter_in:
@@ -377,6 +383,12 @@ class Catalog(object):
                 # date (full): cell must be equal date (full) than filter
                 elif cell_is_date_full and filter[1][0] == '=':
                     if row[index] == rel_filter_in:
+                        out += [row_index] if row_index in indexes_found else []
+                        filter_aplied = True
+
+                # date (full): cell must not be equal date (full) than filter
+                elif cell_is_date_full and filter[1][0] == '#':
+                    if row[index] != rel_filter_in:
                         out += [row_index] if row_index in indexes_found else []
                         filter_aplied = True
 
@@ -407,6 +419,15 @@ class Catalog(object):
                         out += [row_index] if row_index in indexes_found else []
                         filter_aplied = True
 
+                # date (Y-m): cell must not be equal date (Y-m) than filter
+                elif cell_is_date_year_month and filter[1][0] == '#':
+                    if (
+                        row[index].strftime('%Y-%m') !=
+                        rel_filter_in.strftime('%Y-%m')
+                    ):
+                        out += [row_index] if row_index in indexes_found else []
+                        filter_aplied = True
+
                 # date (year): cell must be higher date (year) than filter
                 elif cell_is_date_year and filter[1][0] == '>':
                     if row[index].year > rel_filter_in.year:
@@ -422,6 +443,12 @@ class Catalog(object):
                 # date (year): cell must be equal date (year) than filter
                 elif cell_is_date_year and filter[1][0] == '=':
                     if row[index].year == rel_filter_in.year:
+                        out += [row_index] if row_index in indexes_found else []
+                        filter_aplied = True
+
+                # date (year): cell must not be equal date (year) than filter
+                elif cell_is_date_year and filter[1][0] == '#':
+                    if row[index].year != rel_filter_in.year:
                         out += [row_index] if row_index in indexes_found else []
                         filter_aplied = True
 
