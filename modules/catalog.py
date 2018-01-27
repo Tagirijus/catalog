@@ -193,8 +193,9 @@ class Catalog(object):
         # continue, if column / filter[0] does not exist
         index = self.search_col(search=filter[0])
 
-        if index is False and not quiet:
-            print('Could not apply filter. "{}" column not found.'.format(filter[0]))
+        if index is False:
+            if not quiet:
+                print('Could not apply filter. "{}" column not found.'.format(filter[0]))
             return [input_list.index(x) for x in input_list]
 
         # otherwise get only rows, which fits the filter needs
@@ -428,7 +429,6 @@ class Catalog(object):
                 filter[1],
                 filter[0]
             ))
-
         return out
 
     def get_filtered_rows(self, filter=None, filter_or=None, quiet=False):
