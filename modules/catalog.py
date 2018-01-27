@@ -279,7 +279,10 @@ class Catalog(object):
             # otherwise check according to >, <, = or #
             if relative_filter:
                 # get checking variables
-                cell_is_str = cell_type is str
+                cell_is_str = (
+                    cell_type is str and
+                    str(row[index]) != ''
+                )
                 cell_is_int_or_time = (
                     cell_type is int or
                     cell_type is datetime.timedelta
