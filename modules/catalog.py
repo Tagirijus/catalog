@@ -199,10 +199,12 @@ class Catalog(object):
             return [input_list.index(x) for x in input_list]
 
         # otherwise get only rows, which fits the filter needs
-        filter_aplied = False
         for row_index, row in enumerate(input_list):
-            # prevent index out of range
+
             if index >= len(row):
+                continue
+
+            if row_index not in indexes_found:
                 continue
 
             # only append rows, which have the search term in the chosen col
@@ -210,7 +212,7 @@ class Catalog(object):
             relative_filter = filter[1][0] in ['>', '<', '=', '#']
 
             # get original type of the cell
-            cell_type = type(row[index])
+            cell_type = type(row[index]) if len(filter[1]) > 1 else str
 
             # it's an integer
             if cell_type is int:
@@ -309,72 +311,62 @@ class Catalog(object):
                     # check if cell is empty
                     if filter[1] == '=':
                         if str(row[index]) == '':
-                            out += [row_index] if row_index in indexes_found else []
+                            out += [row_index]
 
                     # check if cell is non-empty
                     elif filter[1] == '#':
                         if str(row[index]) != '':
-                            out += [row_index] if row_index in indexes_found else []
+                            out += [row_index]
 
                 # str: means exclude the given search term
                 elif cell_is_str and filter[1][0] in ['>', '<', '#']:
                     if str(filter[1][1:]) not in str(row[index]):
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # str: otherwise it has to be it 100%
                 elif cell_is_str and filter[1][0] == '=':
                     if str(filter[1][1:]) == str(row[index]):
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # int, timedelta: cell must be higher int than filter
                 elif cell_is_int_or_time and filter[1][0] == '>':
                     if row[index] > rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # int, timedelta: cell must be lower int than filter
                 elif cell_is_int_or_time and filter[1][0] == '<':
                     if row[index] < rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # int, timedelta: cell must be equal int than filter
                 elif cell_is_int_or_time and filter[1][0] == '=':
                     if row[index] == rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # int, timedelta: cell must not be equal int than filter
                 elif cell_is_int_or_time and filter[1][0] == '#':
                     if row[index] != rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (full): cell must be higher date (full) than filter
                 elif cell_is_date_full and filter[1][0] == '>':
                     if row[index] > rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (full): cell must be lower date (full) than filter
                 elif cell_is_date_full and filter[1][0] == '<':
                     if row[index] < rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (full): cell must be equal date (full) than filter
                 elif cell_is_date_full and filter[1][0] == '=':
                     if row[index] == rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (full): cell must not be equal date (full) than filter
                 elif cell_is_date_full and filter[1][0] == '#':
                     if row[index] != rel_filter_in:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (Y-m): cell must be higher date (Y-m) than filter
                 elif cell_is_date_year_month and filter[1][0] == '>':
@@ -382,8 +374,7 @@ class Catalog(object):
                         row[index].strftime('%Y-%m') >
                         rel_filter_in.strftime('%Y-%m')
                     ):
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (Y-m): cell must be lower date (Y-m) than filter
                 elif cell_is_date_year_month and filter[1][0] == '<':
@@ -391,8 +382,7 @@ class Catalog(object):
                         row[index].strftime('%Y-%m') <
                         rel_filter_in.strftime('%Y-%m')
                     ):
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (Y-m): cell must be equal date (Y-m) than filter
                 elif cell_is_date_year_month and filter[1][0] == '=':
@@ -400,8 +390,7 @@ class Catalog(object):
                         row[index].strftime('%Y-%m') ==
                         rel_filter_in.strftime('%Y-%m')
                     ):
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (Y-m): cell must not be equal date (Y-m) than filter
                 elif cell_is_date_year_month and filter[1][0] == '#':
@@ -409,41 +398,35 @@ class Catalog(object):
                         row[index].strftime('%Y-%m') !=
                         rel_filter_in.strftime('%Y-%m')
                     ):
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (year): cell must be higher date (year) than filter
                 elif cell_is_date_year and filter[1][0] == '>':
                     if row[index].year > rel_filter_in.year:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (year): cell must be lower date (year) than filter
                 elif cell_is_date_year and filter[1][0] == '<':
                     if row[index].year < rel_filter_in.year:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (year): cell must be equal date (year) than filter
                 elif cell_is_date_year and filter[1][0] == '=':
                     if row[index].year == rel_filter_in.year:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
                 # date (year): cell must not be equal date (year) than filter
                 elif cell_is_date_year and filter[1][0] == '#':
                     if row[index].year != rel_filter_in.year:
-                        out += [row_index] if row_index in indexes_found else []
-                        filter_aplied = True
+                        out += [row_index]
 
             # fallback / non-relative filter
             else:
                 if str(filter[1]) in str(row[index]):
-                    out += [row_index] if row_index in indexes_found else []
-                    filter_aplied = True
+                    out += [row_index]
 
         # tell the user about the filter application
-        if filter_aplied and not quiet:
+        if not quiet:
             print('Applied filter "{}" for column "{}".'.format(
                 filter[1],
                 filter[0]
