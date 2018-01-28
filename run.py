@@ -87,7 +87,9 @@ ARGS.add_argument(
     action='append',
     help=(
         'Get excluding filter(s) like [COLUMN] [SEARCH]. '
-        '<: lower, >: higher, =: equal, #: unequal'
+        '<: lower, >: higher, =: equal, #: unequal, '
+        '"#" only: cell is not empty and '
+        '"=" only: cell is empty'
     )
 )
 
@@ -98,7 +100,9 @@ ARGS.add_argument(
     action='append',
     help=(
         'Get including filter(s) like [COLUMN] [SEARCH] '
-        '<: lower, >: higher, =: equal, #: unequal'
+        '<: lower, >: higher, =: equal, #: unequal, '
+        '"#" only: cell is not empty and '
+        '"=" only: cell is empty'
     )
 )
 

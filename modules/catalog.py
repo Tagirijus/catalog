@@ -281,7 +281,10 @@ class Catalog(object):
                 # get checking variables
                 cell_is_str = (
                     cell_type is str and
-                    str(row[index]) != ''
+                    (
+                        str(row[index]) != '' and
+                        len(filter[1]) > 1
+                    )
                 )
                 cell_is_int_or_time = (
                     cell_type is int or
@@ -299,9 +302,22 @@ class Catalog(object):
                     cell_type is datetime.date and
                     date_year
                 )
+                check_empty_non_empty = len(filter[1]) == 1
+
+                # check if cell shall be empty or / non-empty
+                if check_empty_non_empty:
+                    # check if cell is empty
+                    if filter[1] == '=':
+                        if str(row[index]) == '':
+                            out += [row_index] if row_index in indexes_found else []
+
+                    # check if cell is non-empty
+                    elif filter[1] == '#':
+                        if str(row[index]) != '':
+                            out += [row_index] if row_index in indexes_found else []
 
                 # str: means exclude the given search term
-                if cell_is_str and filter[1][0] in ['>', '<', '#']:
+                elif cell_is_str and filter[1][0] in ['>', '<', '#']:
                     if str(filter[1][1:]) not in str(row[index]):
                         out += [row_index] if row_index in indexes_found else []
                         filter_aplied = True
