@@ -201,10 +201,14 @@ class Catalog(object):
         # otherwise get only rows, which fits the filter needs
         for row_index, row in enumerate(input_list):
 
-            if index >= len(row):
+            if row_index not in indexes_found:
                 continue
 
-            if row_index not in indexes_found:
+            if index >= len(row):
+                # filter == '=' / "be empty", but column is out of index
+                # (so it is true, practically)
+                if filter[1] == '=':
+                    out += [row_index]
                 continue
 
             # only append rows, which have the search term in the chosen col
