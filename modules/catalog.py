@@ -292,8 +292,9 @@ class Catalog(object):
                         len(filter[1]) > 1
                     )
                 )
-                cell_is_int_or_time = (
+                cell_is_int_float_or_time = (
                     cell_type is int or
+                    cell_type is float or
                     cell_type is datetime.timedelta
                 )
                 cell_is_date_full = (
@@ -333,22 +334,22 @@ class Catalog(object):
                         out += [row_index]
 
                 # int, timedelta: cell must be higher int than filter
-                elif cell_is_int_or_time and filter[1][0] == '>':
+                elif cell_is_int_float_or_time and filter[1][0] == '>':
                     if row[index] > rel_filter_in:
                         out += [row_index]
 
                 # int, timedelta: cell must be lower int than filter
-                elif cell_is_int_or_time and filter[1][0] == '<':
+                elif cell_is_int_float_or_time and filter[1][0] == '<':
                     if row[index] < rel_filter_in:
                         out += [row_index]
 
                 # int, timedelta: cell must be equal int than filter
-                elif cell_is_int_or_time and filter[1][0] == '=':
+                elif cell_is_int_float_or_time and filter[1][0] == '=':
                     if row[index] == rel_filter_in:
                         out += [row_index]
 
                 # int, timedelta: cell must not be equal int than filter
-                elif cell_is_int_or_time and filter[1][0] == '#':
+                elif cell_is_int_float_or_time and filter[1][0] == '#':
                     if row[index] != rel_filter_in:
                         out += [row_index]
 
