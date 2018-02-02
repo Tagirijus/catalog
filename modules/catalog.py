@@ -526,7 +526,7 @@ class Catalog(object):
         # now get only the rows with the indexes in rows_indexes
         return [x for x in self.db[1:] if self.db[1:].index(x) in rows_indexes]
 
-    def append_only_these_columns(self, db=None, append=None):
+    def append_only_these_columns(self, db=None, append=None, ignore_case=False):
         """Append chosen columns only, if they exist."""
         if type(db) is not list or type(append) is not list:
             return db
@@ -550,7 +550,7 @@ class Catalog(object):
 
         return out
 
-    def block_only_these_columns(self, db=None, block=None):
+    def block_only_these_columns(self, db=None, block=None, ignore_case=False):
         """Block chosen columns only, if they exist."""
         if type(db) is not list or type(block) is not list:
             return db
@@ -612,9 +612,17 @@ class Catalog(object):
 
         # appending or blocking of rows
         if append is not None:
-            rows = self.append_only_these_columns(db=rows, append=append)
+            rows = self.append_only_these_columns(
+                db=rows,
+                append=append,
+                ignore_case=ignore_case
+            )
         elif block is not None:
-            rows = self.block_only_these_columns(db=rows, block=block)
+            rows = self.block_only_these_columns(
+                db=rows,
+                block=block,
+                ignore_case=ignore_case
+            )
 
         # output the rows
         return rows
