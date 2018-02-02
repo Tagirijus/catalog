@@ -40,7 +40,8 @@ class Catalog(object):
         filter=None,
         filter_or=None,
         total=None,
-        quiet=False
+        quiet=False,
+        ignore_case=False
     ):
         """
         Count and show data.
@@ -50,7 +51,7 @@ class Catalog(object):
             [1] -> dict with [search string] = count
         """
         # get the index for the column
-        index = self.search_col(search=search)
+        index = self.search_col(search=search, ignore_case=ignore_case)
 
         if index is False and search != 'ALL':
             return False, None
@@ -65,7 +66,8 @@ class Catalog(object):
         rows = self.get_filtered_rows(
             filter=filter,
             filter_or=filter_or,
-            quiet=quiet
+            quiet=quiet,
+            ignore_case=ignore_case
         )
 
         for row in rows:
@@ -105,7 +107,7 @@ class Catalog(object):
                     )
 
                 # check if total COLUMN exists
-                total_column = self.search_col(search=total)
+                total_column = self.search_col(search=total, ignore_case=ignore_case)
 
                 # simply use integer as counting as fallback
                 add_me = 1
@@ -170,14 +172,30 @@ class Catalog(object):
         # return output
         return out, search_data
 
-    def search_col(self, search=None):
+    def search_col(self, search=None, ignore_case=False):
         """Return index of column, if found."""
-        if search in self.cols:
-            return self.cols[search]
+        if search is None:
+            return False
+
+        if ignore_case:
+            search = search.lower()
+            cols = {k.lower(): v for k, v in self.cols.items()}
+        else:
+            cols = self.cols
+
+        if search in cols:
+            return cols[search]
         else:
             return False
 
-    def filter(self, input_list=None, filter=None, indexes_found=None, quiet=False):
+    def filter(
+        self,
+        input_list=None,
+        filter=None,
+        indexes_found=None,
+        quiet=False,
+        ignore_case=False
+    ):
         """Filter the db and output all applyable indexes as a list."""
         # no filter given
         if type(filter) is not list:
@@ -191,7 +209,7 @@ class Catalog(object):
         out = []
 
         # continue, if column / filter[0] does not exist
-        index = self.search_col(search=filter[0])
+        index = self.search_col(search=filter[0], ignore_case=ignore_case)
 
         if index is False:
             if not quiet:
@@ -325,12 +343,26 @@ class Catalog(object):
 
                 # str: means exclude the given search term
                 elif cell_is_str and filter[1][0] in ['>', '<', '#']:
-                    if str(filter[1][1:]) not in str(row[index]):
+                    if ignore_case:
+                        search_string = str(filter[1][1:]).lower()
+                        search_cell = str(row[index]).lower()
+                    else:
+                        search_string = str(filter[1][1:])
+                        search_cell = str(row[index])
+
+                    if search_string not in search_cell:
                         out += [row_index]
 
                 # str: otherwise it has to be it 100%
                 elif cell_is_str and filter[1][0] == '=':
-                    if str(filter[1][1:]) == str(row[index]):
+                    if ignore_case:
+                        search_string = str(filter[1][1:]).lower()
+                        search_cell = str(row[index]).lower()
+                    else:
+                        search_string = str(filter[1][1:])
+                        search_cell = str(row[index])
+
+                    if search_string == search_cell:
                         out += [row_index]
 
                 # int, timedelta: cell must be higher int than filter
@@ -438,13 +470,19 @@ class Catalog(object):
             ))
         return out
 
-    def get_filtered_rows(self, filter=None, filter_or=None, quiet=False):
+    def get_filtered_rows(
+        self,
+        filter=None,
+        filter_or=None,
+        quiet=False,
+        ignore_case=False
+    ):
         """Return the filtered row list."""
         # filter the list (excluding)
         if type(filter) is list:
             # init filtered list (get all indexes as well in list)
             rows_filtered = []
-            indexes_found = self.filter(input_list=self.db[1:], quiet=quiet)
+            indexes_found = self.filter(input_list=self.db[1:],quiet=quiet)
 
             # append found row indexes
             for f in filter:
@@ -452,7 +490,8 @@ class Catalog(object):
                     input_list=self.db[1:],
                     filter=f,
                     indexes_found=indexes_found,
-                    quiet=quiet
+                    quiet=quiet,
+                    ignore_case=ignore_case
                 )
 
                 # refresh indexes_found to new found indexes
@@ -470,7 +509,8 @@ class Catalog(object):
                 rows_filtered_or += self.filter(
                     input_list=self.db[1:],
                     filter=fo,
-                    quiet=quiet
+                    quiet=quiet,
+                    ignore_case=ignore_case
                 )
         else:
             rows_filtered_or = []
@@ -497,7 +537,7 @@ class Catalog(object):
         for row in original:
             row_append = []
             for append_me in append:
-                index = self.search_col(search=append_me)
+                index = self.search_col(search=append_me, ignore_case=ignore_case)
                 if index is False:
                     continue
 
@@ -544,7 +584,8 @@ class Catalog(object):
         header=False,
         quiet=True,
         append=None,
-        block=None
+        block=None,
+        ignore_case=False
     ):
         """List all rows."""
         if header:
@@ -559,7 +600,7 @@ class Catalog(object):
         )
 
         # do the sorting stuff
-        sorting_column = self.search_col(search=sort)
+        sorting_column = self.search_col(search=sort, ignore_case=ignore_case)
 
         if sorting_column is not False:
             if not header:

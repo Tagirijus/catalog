@@ -167,6 +167,14 @@ ARGS.add_argument(
     )
 )
 
+ARGS.add_argument(
+    '-i',
+    '--ignore-case',
+    default=False,
+    action='store_true',
+    help='Ignores the case sensitivity for all given strings from the user'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -193,7 +201,8 @@ if __name__ == '__main__':
             filter=ARGS.filter,
             filter_or=ARGS.filter_or,
             total=ARGS.total,
-            quiet=ARGS.quiet
+            quiet=ARGS.quiet,
+            ignore_case=ARGS.ignore_case
         )
         if show is False:
             print('Column not found: {}.'.format(ARGS.count))
@@ -211,7 +220,8 @@ if __name__ == '__main__':
             header=ARGS.header,
             quiet=ARGS.quiet,
             append=ARGS.append,
-            block=ARGS.block
+            block=ARGS.block,
+            ignore_case=ARGS.ignore_case
         )
         for row in show:
             this_row = []
