@@ -459,7 +459,14 @@ class Catalog(object):
 
             # fallback / non-relative filter
             else:
-                if str(filter[1]) in str(row[index]):
+                if ignore_case:
+                    search_string = str(filter[1][1:]).lower()
+                    search_cell = str(row[index]).lower()
+                else:
+                    search_string = str(filter[1][1:])
+                    search_cell = str(row[index])
+
+                if search_string in search_cell:
                     out += [row_index]
 
         # tell the user about the filter application
@@ -596,7 +603,8 @@ class Catalog(object):
         rows += self.get_filtered_rows(
             filter=filter,
             filter_or=filter_or,
-            quiet=quiet
+            quiet=quiet,
+            ignore_case=ignore_case
         )
 
         # do the sorting stuff
