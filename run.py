@@ -175,6 +175,13 @@ ARGS.add_argument(
     help='Ignores the case sensitivity for all given strings from the user'
 )
 
+ARGS.add_argument(
+    '--all',
+    default=False,
+    action='store_true',
+    help='Also count total of searched items and store it as "TOTAL"'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -202,7 +209,8 @@ if __name__ == '__main__':
             filter_or=ARGS.filter_or,
             total=ARGS.total,
             quiet=ARGS.quiet,
-            ignore_case=ARGS.ignore_case
+            ignore_case=ARGS.ignore_case,
+            all=ARGS.all
         )
         if show is False:
             print('Column not found: {}.'.format(ARGS.count))

@@ -41,7 +41,8 @@ class Catalog(object):
         filter_or=None,
         total=None,
         quiet=False,
-        ignore_case=False
+        ignore_case=False,
+        all=False
     ):
         """
         Count and show data.
@@ -138,14 +139,22 @@ class Catalog(object):
                     dat = 'All'
 
                 # append the dat to the search_data
-                if dat not in search_data.keys():
+                if dat not in search_data:
                     # and begin wih simple counting
                     search_data[dat] = add_me
+
+                    # append all-search, if ARGS.all is enabled
+                    if all and 'TOTAL' not in search_data:
+                        search_data['TOTAL'] = add_me
+                    elif all:
+                        search_data['TOTAL'] += add_me
 
                 # try to append it, but check if type is correct
                 else:
                     try:
                         search_data[dat] += add_me
+                        if all:
+                            search_data['TOTAL'] += add_me
                     except Exception:
                         print('Could not add:', row[index])
 
