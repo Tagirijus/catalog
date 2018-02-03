@@ -47,7 +47,7 @@ ARGS.add_argument(
     '--csv',
     default=False,
     action='store_true',
-    help='Handle cell content as CSV'
+    help='Handle cell content as CSV with ", " as the seperator in the content'
 )
 
 ARGS.add_argument(
