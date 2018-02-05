@@ -185,11 +185,11 @@ ARGS.add_argument(
 ARGS.add_argument(
     '-e',
     '--empty',
-    default='',
-    metavar='VALUE',
+    nargs=2,
+    action='append',
     help=(
-        'Set how an empty cell will be interpreted while counting. Can be '
-        'string ("abc123"), integer ("0") or date ("1987-10-15")'
+        'Set how an empty cell for the column will be interpreted while counting. '
+        'Value can be string ("abc123"), integer ("0") or date ("1987-10-15")'
     )
 )
 

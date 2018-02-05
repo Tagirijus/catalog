@@ -43,7 +43,7 @@ class Catalog(object):
         quiet=False,
         ignore_case=False,
         all=False,
-        empty=''
+        empty=[]
     ):
         """
         Count and show data.
@@ -85,10 +85,6 @@ class Catalog(object):
 
             # cycle through the search_data
             for i, dat in enumerate(row_search_data):
-                # convert empty cell
-                if dat == '':
-                    dat = self.convert_empty(empty=empty)
-
                 # continue counting, if the cell is empty and search != 'ALL'
                 if dat == '' and search != 'ALL':
                     continue
@@ -210,7 +206,7 @@ class Catalog(object):
         indexes_found=None,
         quiet=False,
         ignore_case=False,
-        empty=''
+        empty=[]
     ):
         """Filter the db and output all applyable indexes as a list."""
         # no filter given
@@ -232,6 +228,15 @@ class Catalog(object):
                 print('Could not apply filter. "{}" column not found.'.format(filter[0]))
             return [input_list.index(x) for x in input_list]
 
+        # get empty_index if empty is list with len > 0
+        empty_index = -1
+        empty_str = ''
+        if type(empty) is list:
+            for e in empty:
+                if e[0] == filter[0]:
+                    empty_index = index
+                    empty_str = e[1]
+
         # otherwise get only rows, which fits the filter needs
         for row_index, row in enumerate(input_list):
 
@@ -245,9 +250,9 @@ class Catalog(object):
                     out += [row_index]
                 continue
 
-            # convert empty cell
-            if row[index] == '':
-                row[index] = self.convert_empty(empty=empty)
+            # convert empty cell, if empty_column found
+            if row[index] == '' and empty_index >= 0:
+                row[index] = self.convert_empty(empty=empty_str)
 
             # only append rows, which have the search term in the chosen col
             # check if there is any of these signs on pos 0: >, <, = or #
@@ -503,7 +508,7 @@ class Catalog(object):
         filter_or=None,
         quiet=False,
         ignore_case=False,
-        empty=''
+        empty=[]
     ):
         """Return the filtered row list."""
         # filter the list (excluding)
@@ -547,14 +552,48 @@ class Catalog(object):
 
         # no filter given at all, use the whole list then
         if type(filter) is not list and type(filter_or) is not list:
-            return self.db[1:]
+            rows_indexes = self.filter(input_list=self.db[1:], quiet=quiet)
 
         # filter given, combine their row indexes
         else:
             rows_indexes = rows_filtered + rows_filtered_or
 
-        # now get only the rows with the indexes in rows_indexes
-        return [x for x in self.db[1:] if self.db[1:].index(x) in rows_indexes]
+        # convert the empty list to a dict
+        # empty_replace[INDEX/False] = Replace-str/-int/-date
+        empty_replace = {}
+        if type(empty) is list:
+            for x in empty:
+                empty_replace[
+                    self.search_col(
+                        search=x[0],
+                        ignore_case=ignore_case
+                    )] = self.convert_empty(empty=x[1])
+
+        out = []
+
+        # iter through every row of the orginal db, if row was found by filter
+        for row in [r for r in self.db[1:] if self.db[1:].index(r) in rows_indexes]:
+
+            # fill up missing empty columns for this row
+            diff = len(self.db[0]) - len(row)
+            # only fill, if diff is between 1 and length of all columns
+            if diff > 0 and diff < len(self.db[0]):
+                row += [''] * diff
+            # get rid of the totally empty row
+            elif diff == len(self.db[0]):
+                continue
+
+            # iter through every column now
+            col_append = []
+            for col_index, col in enumerate(row):
+                if col == '' and col_index in empty_replace:
+                    col_append.append(empty_replace[col_index])
+                else:
+                    col_append.append(col)
+
+            out.append(col_append)
+
+        return out
 
     def append_only_these_columns(self, db=None, append=None, ignore_case=False):
         """Append chosen columns only, if they exist."""
@@ -616,7 +655,7 @@ class Catalog(object):
         append=None,
         block=None,
         ignore_case=False,
-        empty=''
+        empty=[]
     ):
         """List all rows."""
         if header:
