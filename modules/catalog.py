@@ -228,12 +228,17 @@ class Catalog(object):
                     continue
 
                 exclude_it = filter[1][0] == '#'
-                search = ''.join([str(x) for x in row])
+                search_in = ''.join([str(x) for x in row])
+                search_me = filter[1][1:] if exclude_it else filter[1]
 
-                if exclude_it and filter[1][1:] not in search:
+                if ignore_case:
+                    search_in = search_in.lower()
+                    search_me = search_me.lower()
+
+                if exclude_it and search_me not in search_in:
                     out += [row_index]
 
-                elif not exclude_it and filter[1] in search:
+                elif not exclude_it and search_me in search_in:
                     out += [row_index]
 
             # tell the user about the filter application
