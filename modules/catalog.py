@@ -69,7 +69,8 @@ class Catalog(object):
             filter=filter,
             filter_or=filter_or,
             quiet=quiet,
-            ignore_case=ignore_case
+            ignore_case=ignore_case,
+            empty=empty
         )
 
         for row in rows:
@@ -208,7 +209,8 @@ class Catalog(object):
         filter=None,
         indexes_found=None,
         quiet=False,
-        ignore_case=False
+        ignore_case=False,
+        empty=''
     ):
         """Filter the db and output all applyable indexes as a list."""
         # no filter given
@@ -242,6 +244,10 @@ class Catalog(object):
                 if filter[1] == '=':
                     out += [row_index]
                 continue
+
+            # convert empty cell
+            if row[index] == '':
+                row[index] = self.convert_empty(empty=empty)
 
             # only append rows, which have the search term in the chosen col
             # check if there is any of these signs on pos 0: >, <, = or #
@@ -496,7 +502,8 @@ class Catalog(object):
         filter=None,
         filter_or=None,
         quiet=False,
-        ignore_case=False
+        ignore_case=False,
+        empty=''
     ):
         """Return the filtered row list."""
         # filter the list (excluding)
@@ -512,7 +519,8 @@ class Catalog(object):
                     filter=f,
                     indexes_found=indexes_found,
                     quiet=quiet,
-                    ignore_case=ignore_case
+                    ignore_case=ignore_case,
+                    empty=empty
                 )
 
                 # refresh indexes_found to new found indexes
@@ -531,7 +539,8 @@ class Catalog(object):
                     input_list=self.db[1:],
                     filter=fo,
                     quiet=quiet,
-                    ignore_case=ignore_case
+                    ignore_case=ignore_case,
+                    empty=empty
                 )
         else:
             rows_filtered_or = []
@@ -606,7 +615,8 @@ class Catalog(object):
         quiet=True,
         append=None,
         block=None,
-        ignore_case=False
+        ignore_case=False,
+        empty=''
     ):
         """List all rows."""
         if header:
@@ -618,7 +628,8 @@ class Catalog(object):
             filter=filter,
             filter_or=filter_or,
             quiet=quiet,
-            ignore_case=ignore_case
+            ignore_case=ignore_case,
+            empty=empty
         )
 
         # do the sorting stuff

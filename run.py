@@ -241,7 +241,8 @@ if __name__ == '__main__':
             quiet=ARGS.quiet,
             append=ARGS.append,
             block=ARGS.block,
-            ignore_case=ARGS.ignore_case
+            ignore_case=ARGS.ignore_case,
+            empty=ARGS.empty
         )
         for row in show:
             this_row = []
