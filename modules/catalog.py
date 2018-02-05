@@ -220,6 +220,20 @@ class Catalog(object):
         # filter given, init out list
         out = []
 
+        # filter column is set to ALL, so search in every column for the keyword
+        if filter[0] == 'ALL':
+            for row_index, row in enumerate(input_list):
+                exclude_it = filter[1][0] == '#'
+                search = ''.join([str(x) for x in row])
+                if exclude_it and filter[1][1:] not in search:
+                    out += [row_index]
+                elif not exclude_it and filter[1] in search:
+                    out += [row_index]
+            # tell the user about the filter application
+            if not quiet:
+                print('Applied filter "{}" for all columns.'.format(filter[1]))
+            return out
+
         # continue, if column / filter[0] does not exist
         index = self.search_col(search=filter[0], ignore_case=ignore_case)
 

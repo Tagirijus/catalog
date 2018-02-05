@@ -89,7 +89,8 @@ ARGS.add_argument(
         'Get excluding filter(s) like [COLUMN] [SEARCH]. '
         '<: lower, >: higher, =: equal, #: unequal, '
         '"#" only: cell is not empty and '
-        '"=" only: cell is empty'
+        '"=" only: cell is empty. -f ALL [SEARCH] for filtering in every column, '
+        'while "=", ">" and "<" won\'t work then'
     )
 )
 
@@ -102,7 +103,8 @@ ARGS.add_argument(
         'Get including filter(s) like [COLUMN] [SEARCH] '
         '<: lower, >: higher, =: equal, #: unequal, '
         '"#" only: cell is not empty and '
-        '"=" only: cell is empty'
+        '"=" only: cell is empty. -f ALL [SEARCH] for filtering in every column, '
+        'while "=", ">" and "<" won\'t work then'
     )
 )
 
