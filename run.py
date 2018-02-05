@@ -182,6 +182,17 @@ ARGS.add_argument(
     help='Also count total of searched items and store it as "TOTAL"'
 )
 
+ARGS.add_argument(
+    '-e',
+    '--empty',
+    default='',
+    metavar='VALUE',
+    help=(
+        'Set how an empty cell will be interpreted while counting. Can be '
+        'string ("abc123"), integer ("0") or date ("1987-10-15")'
+    )
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -210,7 +221,8 @@ if __name__ == '__main__':
             total=ARGS.total,
             quiet=ARGS.quiet,
             ignore_case=ARGS.ignore_case,
-            all=ARGS.all
+            all=ARGS.all,
+            empty=ARGS.empty
         )
         if show is False:
             print('Column not found: {}.'.format(ARGS.count))

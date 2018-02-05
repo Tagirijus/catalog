@@ -42,7 +42,8 @@ class Catalog(object):
         total=None,
         quiet=False,
         ignore_case=False,
-        all=False
+        all=False,
+        empty=''
     ):
         """
         Count and show data.
@@ -83,6 +84,10 @@ class Catalog(object):
 
             # cycle through the search_data
             for i, dat in enumerate(row_search_data):
+                # convert empty cell
+                if dat == '':
+                    dat = self.convert_empty(empty=empty)
+
                 # continue counting, if the cell is empty and search != 'ALL'
                 if dat == '' and search != 'ALL':
                     continue
@@ -498,7 +503,7 @@ class Catalog(object):
         if type(filter) is list:
             # init filtered list (get all indexes as well in list)
             rows_filtered = []
-            indexes_found = self.filter(input_list=self.db[1:],quiet=quiet)
+            indexes_found = self.filter(input_list=self.db[1:], quiet=quiet)
 
             # append found row indexes
             for f in filter:
@@ -643,3 +648,17 @@ class Catalog(object):
 
         # output the rows
         return rows
+
+    def convert_empty(self, empty=''):
+        """Try to convert given parameter to date, int or string."""
+        try:
+            return datetime.datetime.strptime(empty, '%Y-%m-%d').date()
+        except Exception:
+            pass
+
+        try:
+            return int(empty)
+        except Exception:
+            pass
+
+        return str(empty)
