@@ -223,12 +223,19 @@ class Catalog(object):
         # filter column is set to ALL, so search in every column for the keyword
         if filter[0] == 'ALL':
             for row_index, row in enumerate(input_list):
+
+                if row_index not in indexes_found:
+                    continue
+
                 exclude_it = filter[1][0] == '#'
                 search = ''.join([str(x) for x in row])
+
                 if exclude_it and filter[1][1:] not in search:
                     out += [row_index]
+
                 elif not exclude_it and filter[1] in search:
                     out += [row_index]
+
             # tell the user about the filter application
             if not quiet:
                 print('Applied filter "{}" for all columns.'.format(filter[1]))
