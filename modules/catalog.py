@@ -511,10 +511,10 @@ class Catalog(object):
             # fallback / non-relative filter
             else:
                 if ignore_case:
-                    search_string = str(filter[1][1:]).lower()
+                    search_string = str(filter[1]).lower()
                     search_cell = str(row[index]).lower()
                 else:
-                    search_string = str(filter[1][1:])
+                    search_string = str(filter[1])
                     search_cell = str(row[index])
 
                 if search_string in search_cell:
