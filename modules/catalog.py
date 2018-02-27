@@ -8,6 +8,26 @@ import datetime
 from modules import filecheck
 
 
+def convert_to_unixtimestamp(dat=None):
+    correct_type = (
+        type(dat) is datetime.date or
+        type(dat) is datetime.datetime or
+        type(dat) is datetime.timedelta
+    )
+
+    if not correct_type:
+        return dat
+
+    if type(dat) is datetime.timedelta:
+        return int(dat.total_seconds())
+
+    else:
+        if type(dat) is datetime.date:
+            dat = datetime.datetime.combine(dat, datetime.datetime.min.time())
+
+        return int(dat.timestamp())
+
+
 class Catalog(object):
     """The catalog object."""
 
@@ -681,7 +701,8 @@ class Catalog(object):
         append=None,
         block=None,
         ignore_case=False,
-        empty=[]
+        empty=[],
+        unixtimestamp=False
     ):
         """List all rows."""
         if header:
@@ -721,6 +742,12 @@ class Catalog(object):
                 block=block,
                 ignore_case=ignore_case
             )
+
+        # convert datetimes to unix timestamp
+        if unixtimestamp:
+            for r, row in enumerate(rows):
+                for c, col in enumerate(row):
+                    rows[r][c] = convert_to_unixtimestamp(col)
 
         # output the rows
         return rows

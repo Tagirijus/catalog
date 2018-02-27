@@ -195,6 +195,13 @@ ARGS.add_argument(
     )
 )
 
+ARGS.add_argument(
+    '--unixtimestamp',
+    default=False,
+    action='store_true',
+    help='Convert datetimes / timedeltas to unix timestamp on list output.'
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -244,7 +251,8 @@ if __name__ == '__main__':
             append=ARGS.append,
             block=ARGS.block,
             ignore_case=ARGS.ignore_case,
-            empty=ARGS.empty
+            empty=ARGS.empty,
+            unixtimestamp=ARGS.unixtimestamp
         )
         for row in show:
             this_row = []
