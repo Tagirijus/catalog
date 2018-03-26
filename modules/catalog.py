@@ -6,6 +6,7 @@ The catalog object can query information.
 
 import datetime
 from modules import filecheck
+import os
 
 
 def convert_to_unixtimestamp(dat=None):
@@ -31,13 +32,27 @@ def convert_to_unixtimestamp(dat=None):
 class Catalog(object):
     """The catalog object."""
 
-    def __init__(self, file=None, settings=None, quiet=False):
+    def __init__(self, file=None, settings=None, quiet=False, inject=None):
         """Initialize the class."""
         # get the db
         self.db = filecheck.check(file=file, settings=settings, quiet=quiet)
 
         # get cols according to columsn from file
         self.cols = self.get_cols()
+
+        # get injection columns and their programm commands
+        self.inject = self.get_injections(inject=inject)
+
+    def get_injections(self, inject=None):
+        """Get dict with columns and their executable commands."""
+        if inject is None:
+            return {}
+
+        out = {}
+        for given_argument in inject:
+            out[given_argument[0]] = given_argument[1]
+
+        return out
 
     def get_cols(self):
         """Get cols according to columns from file."""
@@ -705,10 +720,7 @@ class Catalog(object):
         unixtimestamp=False
     ):
         """List all rows."""
-        if header:
-            rows = [self.db[0]]
-        else:
-            rows = []
+        rows = [self.db[0]]
 
         rows += self.get_filtered_rows(
             filter=filter,
@@ -743,14 +755,37 @@ class Catalog(object):
                 ignore_case=ignore_case
             )
 
-        # convert datetimes to unix timestamp
-        if unixtimestamp:
-            for r, row in enumerate(rows):
-                for c, col in enumerate(row):
+        # do unix timestamp conversion and executable injection
+        inject_me = len(self.inject.keys()) > 0
+        for r, row in enumerate(rows):
+
+            # skip the alteration for the header
+            if r == 0:
+                continue
+
+            for c, col in enumerate(row):
+
+                # convert datetimes to unix timestamp
+                if unixtimestamp:
                     rows[r][c] = convert_to_unixtimestamp(col)
 
+                # and pass certain columns through the injection executable
+                if inject_me:
+                    if rows[0][c] in self.inject.keys():
+                        command = self.inject[rows[0][c]]
+                        try:
+                            rows[r][c] = os.popen('{} "{}"'.format(
+                                command,
+                                rows[r][c]
+                            )).read().strip()
+                        except Exception as e:
+                            print('Command injection did not work:' + str(e))
+
         # output the rows
-        return rows
+        if not header:
+            return rows[1:]
+        else:
+            return rows
 
     def convert_empty(self, empty=''):
         """Try to convert given parameter to date, int or string."""

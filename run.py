@@ -202,6 +202,17 @@ ARGS.add_argument(
     help='Convert datetimes / timedeltas to unix timestamp on list output.'
 )
 
+ARGS.add_argument(
+    '--inject',
+    nargs=2,
+    action='append',
+    help=(
+        'Use external program commands to manipulate content of a cell like '
+        '[COLUMN] [EXECUTABLE]. The program should accept only one string '
+        'argument and output a string.'
+    )
+)
+
 ARGS = ARGS.parse_args()
 
 if __name__ == '__main__':
@@ -214,7 +225,8 @@ if __name__ == '__main__':
     DB = catalog.Catalog(
         file=ARGS.file,
         settings=SETTINGS,
-        quiet=ARGS.quiet
+        quiet=ARGS.quiet,
+        inject=ARGS.inject
     )
 
     # count query
