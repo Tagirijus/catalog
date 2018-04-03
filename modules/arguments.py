@@ -203,7 +203,11 @@ def getArguments():
         help=(
             'Use external program commands to manipulate content of a cell like '
             '[COLUMN] [EXECUTABLE]. The program should accept only one string '
-            'argument and output a string.'
+            'argument and output a string. The executable string may have a '
+            'placeholder which stands for a column. Then during iteration the '
+            'command will get the value for the column and the specific row there. '
+            'E.g. "TITLE" "echo {NAME}" would replace teh value of the TITLE column '
+            'with the value of the NAME column in the same row.'
         )
     )
 

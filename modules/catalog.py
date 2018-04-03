@@ -772,7 +772,15 @@ class Catalog(object):
                 # and pass certain columns through the injection executable
                 if inject_me:
                     if rows[0][c] in self.inject.keys():
-                        command = self.inject[rows[0][c]]
+
+                        # prepare the command
+                        command = self.prepare_command(
+                            self.inject[rows[0][c]],
+                            rows[0],
+                            rows,
+                            r
+                        )
+
                         try:
                             rows[r][c] = os.popen('{} "{}"'.format(
                                 command,
@@ -786,6 +794,29 @@ class Catalog(object):
             return rows[1:]
         else:
             return rows
+
+    def prepare_command(self, command_string='', header=[], rows=[], row=0):
+        """Replace {VARIABLE} with value from the actual row, if column exists."""
+        # no replacer used
+        if '{' not in command_string:
+            return command_string
+
+        # replacer used, get the column name
+        column = command_string[
+            command_string.find('{') + 1:
+            command_string.find('}')
+        ]
+
+        # column does not exist
+        if column not in header:
+            return command_string
+
+        column_value = rows[row][header.index(column)]
+
+        return command_string.replace(
+            '{{{}}}'.format(column),
+            '"{}"'.format(column_value)
+        )
 
     def convert_empty(self, empty=''):
         """Try to convert given parameter to date, int or string."""
