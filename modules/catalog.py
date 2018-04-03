@@ -686,7 +686,7 @@ class Catalog(object):
             return db
 
         # get header of db
-        header = db[0]
+        header = db[0].copy()
 
         # get rid of blocking header
         for block_me in block:
