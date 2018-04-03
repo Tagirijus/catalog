@@ -685,25 +685,20 @@ class Catalog(object):
         if type(db) is not list or type(block) is not list:
             return db
 
-        original = db
-        original_head = self.db[0]
-        out = []
+        # get header of db
+        header = db[0]
 
-        for row in original:
-            row_append = row
-            for block_me in block:
-                if block_me not in original_head:
-                    continue
-                else:
-                    index = original_head.index(block_me)
+        # get rid of blocking header
+        for block_me in block:
+            if block_me in header:
+                header.pop(header.index(block_me))
 
-                if index < len(row):
-                    original_head.pop(index)
-                    row_append.pop(index)
-
-            out += [row_append]
-
-        return out
+        # return db without blocked headers by appending only the left ones
+        return self.append_only_these_columns(
+            db,
+            header,
+            ignore_case
+        )
 
     def list(
         self,
@@ -748,7 +743,8 @@ class Catalog(object):
                 append=append,
                 ignore_case=ignore_case
             )
-        elif block is not None:
+
+        if block is not None:
             rows = self.block_only_these_columns(
                 db=rows,
                 block=block,
